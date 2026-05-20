@@ -41,8 +41,12 @@ PORTA_ARDUINO=COM3
 BAUD_RATE=9600
 MODO_CLOUD=false
 SIMULACAO_AUTOMATICA=true
-CORS_ORIGEM=*
+CORS_ORIGEM=
 LIMITE_HISTORICO=60
+LIMITE_REQUISICOES=120
+JANELA_TEMPO_MS=60000
+DIAGNOSTICO_TOKEN=
+TRUST_PROXY=false
 ```
 
 Para publicação em nuvem, use:
@@ -101,3 +105,31 @@ Valores esperados:
 ## Publicação
 
 O projeto já está preparado para serviços como Render. O arquivo `render.yaml` usa `npm start`, e o modo cloud pode ser ativado com a variável `MODO_CLOUD=true`.
+
+## Segurança
+
+O servidor aplica headers de proteção, CSP, bloqueio de iframe, bloqueio de métodos diferentes de `GET`, `HEAD` e `OPTIONS`, limite de requisições por IP e validação das leituras recebidas pela serial.
+
+Para restringir CORS em produção, informe uma lista separada por vírgula:
+
+```env
+CORS_ORIGEM=https://seu-site.com,https://outro-dominio.com
+```
+
+Para proteger a rota `/diagnostico`, configure um token:
+
+```env
+DIAGNOSTICO_TOKEN=troque-este-token
+```
+
+Com token ativo, acesse a página visual assim:
+
+```text
+/diagnostico.html?token=troque-este-token
+```
+
+Em hospedagens atrás de proxy HTTPS, como algumas plataformas cloud, ative:
+
+```env
+TRUST_PROXY=true
+```

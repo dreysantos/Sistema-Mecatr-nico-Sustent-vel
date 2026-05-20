@@ -263,7 +263,9 @@ async function carregarDiagnostico() {
     }
 
     try {
-        const dados = await buscarJSON("/diagnostico");
+        const token = new URLSearchParams(window.location.search).get("token");
+        const url = token ? `/diagnostico?token=${encodeURIComponent(token)}` : "/diagnostico";
+        const dados = await buscarJSON(url);
         container.innerHTML = "";
 
         const itens = [

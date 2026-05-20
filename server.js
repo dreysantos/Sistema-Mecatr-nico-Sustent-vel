@@ -9,8 +9,13 @@ const PORTA_ARDUINO = process.env.PORTA_ARDUINO || "COM3";
 const BAUD_RATE = Number(process.env.BAUD_RATE) || 9600;
 const MODO_CLOUD = process.env.MODO_CLOUD === "true";
 const SIMULACAO_AUTOMATICA = process.env.SIMULACAO_AUTOMATICA !== "false";
-const CORS_ORIGEM = process.env.CORS_ORIGEM || "*";
+const CORS_ORIGEM = process.env.CORS_ORIGEM || "";
 const LIMITE_HISTORICO = Number(process.env.LIMITE_HISTORICO) || 60;
+const LIMITE_REQUISICOES = Number(process.env.LIMITE_REQUISICOES) || 120;
+const JANELA_TEMPO = Number(process.env.JANELA_TEMPO_MS) || 60000;
+const DIAGNOSTICO_TOKEN = process.env.DIAGNOSTICO_TOKEN || "";
+const TRUST_PROXY = process.env.TRUST_PROXY === "true";
+const CORS_PERMITIDOS = CORS_ORIGEM.split(",").map((origem) => origem.trim()).filter(Boolean);
 
 let ultimaLeituraReal = 0;
 let reconexaoAgendada = false;
@@ -19,12 +24,59 @@ let portaSerial = null;
 let dadosArduino = criarDadosBase(MODO_CLOUD ? "cloud" : "offline");
 let historico = [];
 
-app.use(express.static(path.join(__dirname, "public")));
-app.use(express.json({ limit: "10kb" }));
+app.disable("x-powered-by");
+
+if (TRUST_PROXY) {
+    app.set("trust proxy", 1);
+}
 
 app.use((req, res, next) => {
-    res.header("Access-Control-Allow-Origin", CORS_ORIGEM);
-    res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    res.setHeader("X-Frame-Options", "DENY");
+    res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+    res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=(), payment=()");
+    res.setHeader("Content-Security-Policy", [
+        "default-src 'self'",
+        "script-src 'self'",
+        "style-src 'self'",
+        "img-src 'self' data:",
+        "connect-src 'self'",
+        "font-src 'self'",
+        "object-src 'none'",
+        "base-uri 'self'",
+        "form-action 'self'",
+        "frame-ancestors 'none'"
+    ].join("; "));
+
+    if (req.secure || req.headers["x-forwarded-proto"] === "https") {
+        res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
+    }
+
+    next();
+});
+
+app.use((req, res, next) => {
+    if (!["GET", "HEAD", "OPTIONS"].includes(req.method)) {
+        return res.status(405).json({ erro: "Metodo nao permitido" });
+    }
+
+    next();
+});
+
+app.use((req, res, next) => {
+    const origem = req.headers.origin;
+    const origemPermitida = !origem || CORS_PERMITIDOS.length === 0 || CORS_PERMITIDOS.includes(origem);
+
+    if (!origemPermitida) {
+        return res.status(403).json({ erro: "Origem nao permitida" });
+    }
+
+    if (origem && CORS_PERMITIDOS.includes(origem)) {
+        res.header("Access-Control-Allow-Origin", origem);
+        res.header("Vary", "Origin");
+    }
+
+    res.header("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");
     res.header("Access-Control-Allow-Headers", "Content-Type");
     if (req.method === "OPTIONS") {
         return res.sendStatus(204);
@@ -33,8 +85,6 @@ app.use((req, res, next) => {
 });
 
 const requisicoes = {};
-const LIMITE_REQUISICOES = 120;
-const JANELA_TEMPO = 60000;
 
 app.use((req, res, next) => {
     const ip = req.ip;
@@ -49,6 +99,30 @@ app.use((req, res, next) => {
     requisicoes[ip].push(agora);
     next();
 });
+
+setInterval(() => {
+    const agora = Date.now();
+    Object.keys(requisicoes).forEach((ip) => {
+        requisicoes[ip] = requisicoes[ip].filter((tempo) => agora - tempo < JANELA_TEMPO);
+        if (requisicoes[ip].length === 0) {
+            delete requisicoes[ip];
+        }
+    });
+}, JANELA_TEMPO).unref();
+
+app.use(express.json({ limit: "10kb", strict: true }));
+app.use(express.static(path.join(__dirname, "public"), {
+    dotfiles: "ignore",
+    etag: true,
+    fallthrough: true,
+    index: "index.html",
+    maxAge: MODO_CLOUD ? "1h" : 0,
+    setHeaders: (res, arquivo) => {
+        if (arquivo.endsWith(".html")) {
+            res.setHeader("Cache-Control", "no-store");
+        }
+    }
+}));
 
 function criarDadosBase(conexao) {
     return {
@@ -191,6 +265,10 @@ function conectarArduino() {
 
         parser.on("data", (linha) => {
             try {
+                if (linha.length > 1000) {
+                    throw new Error("Linha muito longa");
+                }
+
                 const dadosValidados = validarDadosArduino(JSON.parse(linha.trim()));
                 if (!dadosValidados) {
                     throw new Error("Formato invalido");
@@ -236,14 +314,17 @@ function agendarReconexao() {
 }
 
 app.get("/dados", (req, res) => {
+    res.setHeader("Cache-Control", "no-store");
     res.json(obterDadosAtuais());
 });
 
 app.get("/historico", (req, res) => {
+    res.setHeader("Cache-Control", "no-store");
     res.json(historico.slice(-LIMITE_HISTORICO));
 });
 
 app.get("/saude", (req, res) => {
+    res.setHeader("Cache-Control", "no-store");
     res.json({
         status: "online",
         arduino: dadosArduino.conexao,
@@ -253,7 +334,20 @@ app.get("/saude", (req, res) => {
     });
 });
 
+function diagnosticoAutorizado(req) {
+    if (!DIAGNOSTICO_TOKEN) {
+        return true;
+    }
+
+    return req.headers["x-diagnostico-token"] === DIAGNOSTICO_TOKEN || req.query.token === DIAGNOSTICO_TOKEN;
+}
+
 app.get("/diagnostico", (req, res) => {
+    if (!diagnosticoAutorizado(req)) {
+        return res.status(401).json({ erro: "Diagnostico protegido" });
+    }
+
+    res.setHeader("Cache-Control", "no-store");
     res.json({
         statusServidor: "online",
         modoCloud: MODO_CLOUD,
