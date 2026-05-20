@@ -93,6 +93,7 @@ Valores esperados:
 - `GET /dados`: leitura atual. Em cloud/offline pode retornar dados simulados.
 - `GET /historico`: últimas leituras armazenadas.
 - `GET /leituras`: últimas leituras salvas no banco local. Aceita `?limite=100` e respeita `DIAGNOSTICO_TOKEN` quando configurado.
+- `GET /rede`: mostra o IP local e links para acessar o painel e as leituras em outro dispositivo.
 - `GET /saude`: status simples do servidor.
 - `GET /diagnostico`: status detalhado do servidor, Arduino, memória e histórico.
 
@@ -120,6 +121,14 @@ Para consultar as leituras salvas:
 ```text
 /leituras?limite=100
 ```
+
+Para acessar pelo celular, deixe o celular na mesma rede Wi-Fi do computador e abra a página:
+
+```text
+/leituras.html
+```
+
+Essa página mostra automaticamente o link completo de rede, como `http://192.168.0.10:3000/leituras.html`.
 
 ## Páginas
 

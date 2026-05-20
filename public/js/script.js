@@ -361,6 +361,22 @@ async function carregarLeituras() {
     }
 }
 
+async function carregarLinkCelular() {
+    const link = elemento("linkCelularLeituras");
+    if (!link) {
+        return;
+    }
+
+    try {
+        const rede = await buscarJSON("/rede");
+        const token = new URLSearchParams(window.location.search).get("token");
+        const url = token ? `${rede.leiturasCelular}?token=${encodeURIComponent(token)}` : rede.leiturasCelular;
+        link.innerText = url;
+    } catch (erro) {
+        link.innerText = "Não foi possível identificar o IP da rede. Veja o endereço exibido no terminal do servidor.";
+    }
+}
+
 async function buscarDadosArduino() {
     try {
         const dados = await buscarJSON("/dados");
@@ -436,6 +452,7 @@ if (elemento("diagnosticoDados")) {
 }
 
 if (elemento("tabelaLeituras")) {
+    carregarLinkCelular();
     carregarLeituras();
     elemento("atualizarLeituras")?.addEventListener("click", carregarLeituras);
     elemento("limiteLeituras")?.addEventListener("change", carregarLeituras);

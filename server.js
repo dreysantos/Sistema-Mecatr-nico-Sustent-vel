@@ -146,6 +146,20 @@ function criarDadosBase(conexao) {
     };
 }
 
+function obterIpLocal() {
+    const interfaces = os.networkInterfaces();
+
+    for (const name of Object.keys(interfaces)) {
+        for (const iface of interfaces[name]) {
+            if (iface.family === "IPv4" && !iface.internal) {
+                return iface.address;
+            }
+        }
+    }
+
+    return "localhost";
+}
+
 function criarRegistroLeitura(dados) {
     return {
         id: `${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
@@ -419,6 +433,22 @@ app.get("/saude", (req, res) => {
     });
 });
 
+app.get("/rede", (req, res) => {
+    const ipLocal = obterIpLocal();
+    const baseLocal = `http://localhost:${PORTA_SITE}`;
+    const baseRede = `http://${ipLocal}:${PORTA_SITE}`;
+
+    res.setHeader("Cache-Control", "no-store");
+    res.json({
+        ipLocal,
+        porta: PORTA_SITE,
+        mesmoDispositivo: baseLocal,
+        celular: baseRede,
+        leiturasCelular: `${baseRede}/leituras.html`,
+        painelCelular: `${baseRede}/painel.html`
+    });
+});
+
 function diagnosticoAutorizado(req) {
     if (!DIAGNOSTICO_TOKEN) {
         return true;
@@ -462,21 +492,12 @@ app.use((req, res) => {
 });
 
 app.listen(PORTA_SITE, "0.0.0.0", () => {
-    const interfaces = os.networkInterfaces();
-    let ipLocal = "localhost";
-
-    for (const name of Object.keys(interfaces)) {
-        for (const iface of interfaces[name]) {
-            if (iface.family === "IPv4" && !iface.internal) {
-                ipLocal = iface.address;
-                break;
-            }
-        }
-    }
+    const ipLocal = obterIpLocal();
 
     inicializarBanco();
     console.log(`\nServidor rodando em http://${ipLocal}:${PORTA_SITE}`);
     console.log(`Acesse de outro dispositivo: http://${ipLocal}:${PORTA_SITE}`);
+    console.log(`Leituras no celular: http://${ipLocal}:${PORTA_SITE}/leituras.html`);
     console.log(`Diagnostico: http://${ipLocal}:${PORTA_SITE}/diagnostico`);
     conectarArduino();
 });
