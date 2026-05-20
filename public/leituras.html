@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Consulta visual das leituras salvas do Sistema Mecatrônico." />
+    <meta name="author" content="CETEP-RM" />
+    <meta name="theme-color" content="#005f56" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Leituras Salvas - Sistema Mecatrônico</title>
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body>
+    <header>
+        <h1>Sistema Mecatrônico Automatizado</h1>
+        <p>Painel local de acompanhamento das leituras do sistema de controle de água, energia e alimentação solar.</p>
+    </header>
+
+    <nav>
+        <a href="index.html">Início</a>
+        <a href="painel.html">Painel</a>
+        <a href="leituras.html" aria-current="page">Leituras</a>
+        <a href="lcd.html">LCD</a>
+        <a href="funcionamento.html">Funcionamento</a>
+        <a href="componentes.html">Componentes</a>
+        <a href="simulacao.html">Simulação</a>
+        <a href="diagnostico.html">Diagnóstico</a>
+        <a href="sobre.html">Sobre</a>
+    </nav>
+
+    <section>
+        <h2 class="titulo-secao">Leituras salvas no banco</h2>
+        <p class="texto">
+            Aqui você consulta as informações gravadas automaticamente no banco local. Use esta tela para conferir histórico, apresentar resultados e verificar se os dados estão sendo salvos.
+        </p>
+
+        <div class="consulta-box">
+            <label>
+                Quantidade
+                <select id="limiteLeituras">
+                    <option value="20">20 leituras</option>
+                    <option value="50" selected>50 leituras</option>
+                    <option value="100">100 leituras</option>
+                    <option value="250">250 leituras</option>
+                </select>
+            </label>
+
+            <label>
+                Token do diagnóstico
+                <input id="tokenLeituras" type="password" autocomplete="off" placeholder="Só preencha se configurou DIAGNOSTICO_TOKEN" />
+            </label>
+
+            <button class="botao-primario botao-consulta" id="atualizarLeituras" type="button">Atualizar leituras</button>
+        </div>
+
+        <div class="status-conexao" id="statusLeituras">
+            <span class="ponto-conexao simulado"></span>
+            <span>Aguardando consulta ao banco...</span>
+        </div>
+
+        <div class="diagnostico-grid" id="resumoLeituras">
+            <div class="diagnostico-item">
+                <strong>Total carregado</strong>
+                <p>0 leituras</p>
+            </div>
+            <div class="diagnostico-item">
+                <strong>Último registro</strong>
+                <p>Aguardando dados</p>
+            </div>
+            <div class="diagnostico-item">
+                <strong>Fonte</strong>
+                <p>Banco local</p>
+            </div>
+        </div>
+
+        <div class="info-box tabela-box">
+            <h3>Histórico gravado</h3>
+            <div class="tabela-scroll">
+                <table class="tabela-leituras">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Nível</th>
+                            <th>Bomba</th>
+                            <th>Bateria</th>
+                            <th>Solar</th>
+                            <th>Corrente</th>
+                            <th>Alerta</th>
+                            <th>Origem</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelaLeituras">
+                        <tr>
+                            <td colspan="8">Clique em atualizar para carregar as leituras salvas.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>Projeto: Sistema Mecatrônico Automatizado | CETEP-RM | Camaçari - BA | 2026</p>
+    </footer>
+
+    <script src="js/script.js"></script>
+</body>
+
+</html>

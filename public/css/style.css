@@ -155,6 +155,13 @@ section {
     outline: none;
 }
 
+.botao-consulta {
+    min-height: 44px;
+    margin: 0;
+    border: 0;
+    cursor: pointer;
+}
+
 .painel,
 .grid-explicacao,
 .componentes,
@@ -381,6 +388,94 @@ section h4 {
     line-height: 1.6;
 }
 
+.consulta-box {
+    display: grid;
+    grid-template-columns: 160px minmax(260px, 1fr) auto;
+    gap: 14px;
+    align-items: end;
+    margin: 26px 0 18px;
+    padding: 18px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    box-shadow: var(--shadow);
+}
+
+.consulta-box label {
+    display: grid;
+    gap: 7px;
+    color: var(--brand);
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.consulta-box select,
+.consulta-box input {
+    min-height: 42px;
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface-soft);
+    color: var(--text);
+    font: inherit;
+    padding: 0 11px;
+}
+
+.tabela-box {
+    margin-top: 22px;
+}
+
+.tabela-scroll {
+    width: 100%;
+    overflow-x: auto;
+    margin-top: 14px;
+}
+
+.tabela-leituras {
+    min-width: 880px;
+    font-size: 14px;
+}
+
+.tabela-leituras th,
+.tabela-leituras td {
+    padding: 12px 10px;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+    vertical-align: middle;
+}
+
+.tabela-leituras th {
+    color: var(--brand);
+    background: var(--surface-soft);
+    font-size: 13px;
+    text-transform: uppercase;
+}
+
+.selo {
+    display: inline-flex;
+    align-items: center;
+    min-height: 26px;
+    padding: 0 9px;
+    border-radius: 999px;
+    background: var(--surface-soft);
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.selo.ok {
+    color: var(--brand-strong);
+}
+
+.selo.aviso {
+    color: var(--warning);
+}
+
+.selo.erro {
+    color: var(--danger);
+}
+
 .simulacao-card {
     overflow: hidden;
 }
@@ -498,6 +593,10 @@ footer p {
     .conexoes-grid,
     .resumo-grid,
     .diagnostico-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .consulta-box {
         grid-template-columns: 1fr;
     }
 

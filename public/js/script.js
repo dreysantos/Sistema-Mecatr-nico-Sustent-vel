@@ -26,6 +26,15 @@ function elemento(id) {
     return document.getElementById(id);
 }
 
+function escaparHTML(valor) {
+    return String(valor ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
 function texto(id, valor) {
     const el = elemento(id);
     if (el) {
@@ -235,6 +244,123 @@ async function buscarJSON(url) {
     }
 }
 
+function formatarDataLeitura(leitura) {
+    if (!leitura.dataISO) {
+        return leitura.horario || "-";
+    }
+
+    const data = new Date(leitura.dataISO);
+    if (Number.isNaN(data.getTime())) {
+        return leitura.horario || "-";
+    }
+
+    return data.toLocaleString("pt-BR");
+}
+
+function classeAlerta(alerta) {
+    if (alerta === "NORMAL") {
+        return "ok";
+    }
+
+    return alerta ? "erro" : "aviso";
+}
+
+function atualizarStatusLeituras(tipo, mensagem) {
+    const status = elemento("statusLeituras");
+    if (!status) {
+        return;
+    }
+
+    const classePonto = tipo === "ok" ? "online" : tipo === "erro" ? "offline" : "simulado";
+    status.innerHTML = `<span class="ponto-conexao ${classePonto}"></span><span>${escaparHTML(mensagem)}</span>`;
+}
+
+function atualizarResumoLeituras(leituras) {
+    const resumo = elemento("resumoLeituras");
+    if (!resumo) {
+        return;
+    }
+
+    const ultima = leituras[leituras.length - 1];
+    const reais = leituras.filter((leitura) => !leitura.simulado).length;
+    const simuladas = leituras.length - reais;
+
+    resumo.innerHTML = `
+        <div class="diagnostico-item">
+            <strong>Total carregado</strong>
+            <p>${leituras.length} leituras</p>
+        </div>
+        <div class="diagnostico-item">
+            <strong>Último registro</strong>
+            <p>${ultima ? escaparHTML(formatarDataLeitura(ultima)) : "Sem dados salvos"}</p>
+        </div>
+        <div class="diagnostico-item">
+            <strong>Origem dos dados</strong>
+            <p>${reais} reais / ${simuladas} simuladas</p>
+        </div>
+    `;
+}
+
+function renderizarTabelaLeituras(leituras) {
+    const tabela = elemento("tabelaLeituras");
+    if (!tabela) {
+        return;
+    }
+
+    if (leituras.length === 0) {
+        tabela.innerHTML = `<tr><td colspan="8">Nenhuma leitura salva ainda. Abra o painel, aguarde alguns segundos e atualize esta página.</td></tr>`;
+        return;
+    }
+
+    tabela.innerHTML = leituras.slice().reverse().map((leitura) => {
+        const alerta = leitura.alerta || "-";
+        const origem = leitura.simulado ? "Simulada" : "Arduino";
+
+        return `
+            <tr>
+                <td>${escaparHTML(formatarDataLeitura(leitura))}</td>
+                <td><span class="selo ${leitura.nivel === "CHEIO" ? "ok" : leitura.nivel === "BAIXO" ? "erro" : "aviso"}">${escaparHTML(leitura.nivel || "-")}</span></td>
+                <td>${escaparHTML(leitura.bomba || "-")}</td>
+                <td>${Number(leitura.tensaoBateria || 0).toFixed(1)}V / ${Math.round(Number(leitura.cargaBateria || 0))}%</td>
+                <td>${Number(leitura.tensaoSolar || 0).toFixed(1)}V</td>
+                <td>${Number(leitura.corrente || 0).toFixed(2)}A</td>
+                <td><span class="selo ${classeAlerta(alerta)}">${escaparHTML(alerta)}</span></td>
+                <td><span class="selo ${leitura.simulado ? "aviso" : "ok"}">${origem}</span></td>
+            </tr>
+        `;
+    }).join("");
+}
+
+async function carregarLeituras() {
+    const tabela = elemento("tabelaLeituras");
+    if (!tabela) {
+        return;
+    }
+
+    const limite = elemento("limiteLeituras")?.value || "50";
+    const tokenCampo = elemento("tokenLeituras");
+    const tokenUrl = new URLSearchParams(window.location.search).get("token");
+    const token = tokenCampo?.value || tokenUrl || "";
+    const url = token ? `/leituras?limite=${encodeURIComponent(limite)}&token=${encodeURIComponent(token)}` : `/leituras?limite=${encodeURIComponent(limite)}`;
+
+    if (tokenCampo && tokenUrl && !tokenCampo.value) {
+        tokenCampo.value = tokenUrl;
+    }
+
+    atualizarStatusLeituras("carregando", "Consultando o banco local...");
+
+    try {
+        const leituras = await buscarJSON(url);
+        renderizarTabelaLeituras(Array.isArray(leituras) ? leituras : []);
+        atualizarResumoLeituras(Array.isArray(leituras) ? leituras : []);
+        atualizarStatusLeituras("ok", "Leituras carregadas com sucesso.");
+    } catch (erro) {
+        tabela.innerHTML = `<tr><td colspan="8">Não foi possível carregar. Se configurou DIAGNOSTICO_TOKEN, informe o token acima.</td></tr>`;
+        atualizarResumoLeituras([]);
+        atualizarStatusLeituras("erro", `Erro ao consultar o banco: ${erro.message}`);
+    }
+}
+
 async function buscarDadosArduino() {
     try {
         const dados = await buscarJSON("/dados");
@@ -307,6 +433,12 @@ if (elemento(ids.nivelAgua) || elemento(ids.lcdLinha1)) {
 if (elemento("diagnosticoDados")) {
     carregarDiagnostico();
     setInterval(carregarDiagnostico, 3000);
+}
+
+if (elemento("tabelaLeituras")) {
+    carregarLeituras();
+    elemento("atualizarLeituras")?.addEventListener("click", carregarLeituras);
+    elemento("limiteLeituras")?.addEventListener("change", carregarLeituras);
 }
 
 window.addEventListener("resize", desenharGrafico);

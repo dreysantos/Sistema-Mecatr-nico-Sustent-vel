@@ -125,6 +125,7 @@ Para consultar as leituras salvas:
 
 - `/index.html`: visão inicial.
 - `/painel.html`: painel em tempo real.
+- `/leituras.html`: consulta visual das leituras salvas no banco.
 - `/lcd.html`: representação do LCD.
 - `/funcionamento.html`: explicação do fluxo.
 - `/componentes.html`: lista de componentes.
