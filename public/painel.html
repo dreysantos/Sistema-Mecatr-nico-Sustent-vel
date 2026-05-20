@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Painel de monitoramento em tempo real de sistema mecatrônico com controle de água, energia solar e bateria." />
+    <meta name="keywords" content="Arduino, automação, energia solar, monitoramento" />
+    <meta name="author" content="CETEP-RM" />
+    <meta name="theme-color" content="#005f56" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='75' font-size='75' fill='%23005f56'>⚡</text></svg>" />
+    <title>Painel de Monitoramento - Sistema Mecatrônico</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+    <header>
+        <h1>Sistema Mecatrônico Automatizado</h1>
+        <p>
+            Painel local de acompanhamento das leituras do sistema de controle de água, energia e alimentação solar.
+        </p>
+    </header>
+
+    <nav>
+        <a href="index.html">🏠 Início</a>
+        <a href="painel.html">Painel</a>
+        <a href="lcd.html">LCD</a>
+        <a href="funcionamento.html">Funcionamento</a>
+        <a href="componentes.html">Componentes</a>
+        <a href="sobre.html">Sobre</a>
+    </nav>
+
+    <section>
+        <h2 class="titulo-secao">📊 Painel de Monitoramento</h2>
+
+        <p class="texto">
+            Esta página mostra as informações recebidas do Arduino por meio de uma página local via servidor web. O Arduino envia os dados pelo cabo USB para o computador, e o site exibe as leituras em tempo real.
+        </p>
+
+        <div class="status-conexao" id="statusConexao">
+            <span class="ponto-conexao" id="pontoConexao"></span>
+            <span id="textoConexao">Aguardando conexão...</span>
+        </div>
+
+        <div class="painel">
+
+            <div class="card">
+                <h3>💧 Nível da Água</h3>
+                <p class="valor status-normal" id="nivelAgua">AGUARDANDO</p>
+                <p>Indica se o reservatório está baixo, médio ou cheio.</p>
+            </div>
+
+            <div class="card">
+                <h3>🔌 Status da Bomba</h3>
+                <p class="valor status-normal" id="statusBomba">AGUARDANDO</p>
+                <p>Mostra se a bomba está ligada ou desligada.</p>
+            </div>
+
+            <div class="card">
+                <h3>⚡ Corrente Atual</h3>
+                <p class="valor" id="corrente">0.00 A</p>
+                <p>Leitura do consumo elétrico do sistema.</p>
+            </div>
+
+            <div class="card">
+                <h3>🔋 Bateria</h3>
+                <p class="valor status-normal" id="bateria">0.0V - 0%</p>
+                <p>Mostra a tensão e a carga estimada da bateria.</p>
+            </div>
+
+            <div class="card">
+                <h3>☀️ Placa Solar</h3>
+                <p class="valor" id="solar">0.0 V</p>
+                <p>Mostra a tensão recebida da placa solar.</p>
+            </div>
+
+            <div class="card">
+                <h3>🚨 Alerta</h3>
+                <p class="valor status-normal" id="alerta">AGUARDANDO</p>
+                <p>Indica bateria baixa, corrente alta ou sistema normal.</p>
+            </div>
+
+        </div>
+    </section>
+
+    <footer>
+        <p>
+            Projeto: Sistema Mecatrônico Automatizado | CETEP-RM | Camaçari - BA | 2026
+        </p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

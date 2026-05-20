@@ -1,0 +1,230 @@
+/* =====================================
+   ESTILOS GLOBAIS - Sistema Mecatrônico
+   ===================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+    background: #eef7f3;
+    color: #1d2b2a;
+}
+
+header {
+    background: linear-gradient(135deg, #005f56, #1ea672);
+    color: white;
+    padding: 42px 8%;
+    text-align: center;
+}
+
+header h1 {
+    font-size: 34px;
+    margin-bottom: 12px;
+}
+
+header p {
+    font-size: 17px;
+    max-width: 900px;
+    margin: auto;
+    line-height: 1.5;
+}
+
+nav {
+    background: #00443d;
+    padding: 14px;
+    text-align: center;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    margin: 0 14px;
+    font-weight: bold;
+    font-size: 15px;
+    transition: color 0.3s;
+}
+
+nav a:hover {
+    color: #b9ffd6;
+}
+
+section {
+    padding: 45px 8%;
+}
+
+.titulo-secao {
+    font-size: 28px;
+    color: #006b5f;
+    margin-bottom: 18px;
+    border-left: 6px solid #1ea672;
+    padding-left: 12px;
+}
+
+.texto {
+    font-size: 17px;
+    line-height: 1.7;
+    margin-bottom: 18px;
+}
+
+footer {
+    background: #00443d;
+    color: white;
+    text-align: center;
+    padding: 25px;
+    margin-top: 30px;
+}
+
+
+/* Status de Conexão */
+
+.status-conexao {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background: #f0f8f6;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    color: #000;
+    font-weight: 500;
+    border-left: 4px solid #d68b00;
+}
+
+.ponto-conexao {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+.ponto-conexao.online {
+    background: #16804f;
+    box-shadow: 0 0 8px rgba(22, 128, 79, 0.6);
+}
+
+.ponto-conexao.offline {
+    background: #c0392b;
+    box-shadow: 0 0 8px rgba(192, 57, 43, 0.6);
+    animation: pulse-erro 1s infinite;
+}
+
+@keyframes pulse {
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.6;
+    }
+}
+
+@keyframes pulse-erro {
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.3;
+    }
+}
+
+
+/* Status colors */
+
+.status-normal {
+    color: #16804f;
+}
+
+.status-alerta {
+    color: #c0392b;
+}
+
+.status-atencao {
+    color: #d68b00;
+}
+
+
+/* Alerta Site */
+
+.alerta-site {
+    background: #fff4dc;
+    border-left: 6px solid #d68b00;
+    padding: 18px;
+    border-radius: 12px;
+    margin-top: 20px;
+    line-height: 1.6;
+}
+
+
+/* Responsive */
+
+@media (max-width: 650px) {
+    header h1 {
+        font-size: 26px;
+    }
+    nav a {
+        display: inline-block;
+        margin: 7px;
+    }
+}
+
+@media (max-width: 480px) {
+    body {
+        font-size: 14px;
+    }
+    header {
+        padding: 25px 5%;
+    }
+    header h1 {
+        font-size: 22px;
+    }
+    section {
+        padding: 30px 5%;
+    }
+    nav a {
+        font-size: 13px;
+        margin: 5px;
+    }
+}
+
+
+/* Modo Escuro */
+
+@media (prefers-color-scheme: dark) {
+    body {
+        background: #0f1612;
+        color: #f0f0f0;
+    }
+    header {
+        background: linear-gradient(135deg, #003d38, #006b5f);
+    }
+    nav {
+        background: #001f1a;
+    }
+    .titulo-secao {
+        color: #7fffc9;
+    }
+    .status-conexao {
+        background: #1a2a27;
+        border-left-color: #7fffc9;
+        color: #f0f0f0;
+        font-weight: 500;
+    }
+    .alerta-site {
+        background: #2a2410;
+        border-left-color: #ffb84d;
+        color: #f0f0f0;
+    }
+    footer {
+        background: #001f1a;
+    }
+}

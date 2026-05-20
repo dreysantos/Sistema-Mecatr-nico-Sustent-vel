@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: sistema-mecatronico-sustentavel
+    env: node
+    plan: starter
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: MODO_CLOUD
+        value: "true"
+      - key: BAUD_RATE
+        value: "9600"
