@@ -4,75 +4,62 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Visualização LCD - Sistema Mecatrônico" />
-    <meta name="keywords" content="Arduino, automação, LCD, display" />
+    <meta name="description" content="Visualização LCD do Sistema Mecatrônico." />
     <meta name="author" content="CETEP-RM" />
     <meta name="theme-color" content="#005f56" />
     <meta name="color-scheme" content="light dark" />
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='75' font-size='75' fill='%23005f56'>⚡</text></svg>" />
     <title>Leitura LCD - Sistema Mecatrônico</title>
-    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="css/style.css" />
 </head>
 
 <body>
-
     <header>
         <h1>Sistema Mecatrônico Automatizado</h1>
-        <p>
-            Painel local de acompanhamento das leituras do sistema de controle de água, energia e alimentação solar.
-        </p>
+        <p>Painel local de acompanhamento das leituras do sistema de controle de água, energia e alimentação solar.</p>
     </header>
 
     <nav>
-        <a href="index.html">🏠 Início</a>
+        <a href="index.html">Início</a>
         <a href="painel.html">Painel</a>
-        <a href="lcd.html">LCD</a>
+        <a href="lcd.html" aria-current="page">LCD</a>
         <a href="funcionamento.html">Funcionamento</a>
         <a href="componentes.html">Componentes</a>
+        <a href="simulacao.html">Simulação</a>
+        <a href="diagnostico.html">Diagnóstico</a>
         <a href="sobre.html">Sobre</a>
     </nav>
 
     <section>
-        <h2 class="titulo-secao">📱 Leitura como aparece no LCD</h2>
+        <h2 class="titulo-secao">Leitura como aparece no LCD</h2>
+        <p class="texto">Representação visual do display LCD 16x2 usado no protótipo, sincronizada com os dados do painel.</p>
 
-        <p class="texto">
-            Abaixo está uma representação visual parecida com o display LCD 16x2 usado no protótipo. Ela será atualizada de acordo com os dados enviados pelo Arduino.
-        </p>
-
-        <div style="margin: 40px 0;">
-            <h3 style="color: #006b5f; margin-bottom: 20px; font-size: 18px;">Display Principal</h3>
-
-            <div class="lcd-box">
-                <div class="lcd-linha" id="lcdLinha1">AGUARDANDO...</div>
-                <div class="lcd-linha" id="lcdLinha2">DADOS DO SISTEMA</div>
-            </div>
-
-            <h3 style="color: #006b5f; margin-top: 30px; margin-bottom: 20px; font-size: 18px;">Monitoramento Energético</h3>
-
-            <div class="lcd-box">
-                <div class="lcd-linha" id="lcdLinha3">BAT:0.0V 0%</div>
-                <div class="lcd-linha" id="lcdLinha4">SOLAR:0.0V</div>
-            </div>
+        <h3>Display principal</h3>
+        <div class="lcd-box">
+            <div class="lcd-linha" id="lcdLinha1">AGUARDANDO...</div>
+            <div class="lcd-linha" id="lcdLinha2">DADOS DO SISTEMA</div>
         </div>
 
-        <div style="margin-top: 40px; padding: 20px; background: white; border-radius: 12px; border-left: 5px solid #1ea672;">
-            <h3 style="color: #006b5f; margin-bottom: 15px;">ℹ️ Informações do Display</h3>
-            <ul style="line-height: 1.8; color: #1d2b2a;">
-                <li><strong>Tipo:</strong> LCD I2C 16x2 (16 caracteres x 2 linhas)</li>
-                <li><strong>Atualização:</strong> A cada 1 segundo, sincronizado com o painel</li>
-                <li><strong>Dados exibidos:</strong> Nível da água, tensão de bateria, carga e tensão solar</li>
-                <li><strong>Propósito:</strong> Monitoramento local no protótipo e na interface web</li>
+        <h3>Monitoramento energético</h3>
+        <div class="lcd-box">
+            <div class="lcd-linha" id="lcdLinha3">BAT:0.0V 0%</div>
+            <div class="lcd-linha" id="lcdLinha4">SOLAR:0.0V</div>
+        </div>
+
+        <div class="info-box">
+            <h3>Informações do display</h3>
+            <ul class="lista-limpa">
+                <li><strong>Tipo:</strong> LCD I2C 16x2.</li>
+                <li><strong>Atualização:</strong> a cada segundo, junto com o painel.</li>
+                <li><strong>Dados exibidos:</strong> nível da água, bateria, carga e tensão solar.</li>
             </ul>
         </div>
     </section>
 
     <footer>
-        <p>
-            Projeto: Sistema Mecatrônico Automatizado | CETEP-RM | Camaçari - BA | 2026
-        </p>
+        <p>Projeto: Sistema Mecatrônico Automatizado | CETEP-RM | Camaçari - BA | 2026</p>
     </footer>
 
-    <script src="script.js"></script>
+    <script src="js/script.js"></script>
 </body>
 
 </html>

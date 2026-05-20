@@ -9,86 +9,58 @@
     <meta name="author" content="CETEP-RM" />
     <meta name="theme-color" content="#005f56" />
     <meta name="color-scheme" content="light dark" />
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='75' font-size='75' fill='%23005f56'>⚡</text></svg>" />
     <title>Sistema Mecatrônico Sustentável</title>
-    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="css/style.css" />
 </head>
 
 <body>
-
     <header>
         <h1>Sistema Mecatrônico Automatizado</h1>
-        <p>
-            Painel local de acompanhamento das leituras do sistema de controle de água, energia e alimentação solar.
-        </p>
+        <p>Painel local de acompanhamento das leituras do sistema de controle de água, energia e alimentação solar.</p>
     </header>
 
     <nav>
+        <a href="index.html" aria-current="page">Início</a>
         <a href="painel.html">Painel</a>
         <a href="lcd.html">LCD</a>
         <a href="funcionamento.html">Funcionamento</a>
         <a href="componentes.html">Componentes</a>
+        <a href="simulacao.html">Simulação</a>
+        <a href="diagnostico.html">Diagnóstico</a>
         <a href="sobre.html">Sobre</a>
     </nav>
 
-    <section style="padding: 60px 8%; text-align: center;">
-        <h2 class="titulo-secao">Bem-vindo! 👋</h2>
-
-        <p class="texto" style="max-width: 600px; margin: 20px auto;">
-            Este é o painel de monitoramento em tempo real do Sistema Mecatrônico Automatizado para controle inteligente de água, energia solar e bateria.
+    <section class="hero-home">
+        <h2 class="titulo-secao">Monitoramento do protótipo</h2>
+        <p class="texto">
+            Acompanhe sensores de nível de água, bomba, bateria, placa solar, corrente e alertas em uma interface pronta para uso local, apresentação e publicação em nuvem.
         </p>
 
-        <div style="margin: 40px 0;">
-            <a href="painel.html" style="
-                display: inline-block;
-                background: linear-gradient(135deg, #005f56, #1ea672);
-                color: white;
-                padding: 18px 40px;
-                border-radius: 8px;
-                text-decoration: none;
-                font-weight: bold;
-                font-size: 18px;
-                transition: transform 0.2s;
-                cursor: pointer;
-            " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-                🚀 Ir para o Painel de Monitoramento
-            </a>
-        </div>
+        <a class="botao-primario" href="painel.html">Abrir painel de monitoramento</a>
 
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 50px; max-width: 1000px; margin-left: auto; margin-right: auto;">
-            <div style="background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
-                <h3 style="color: #006b5f; margin-bottom: 10px;">📊 Painel</h3>
-                <p>Monitore em tempo real todos os sensores e alertas do sistema.</p>
+        <div class="cards-home">
+            <div class="card">
+                <h3>Painel em tempo real</h3>
+                <p>Mostra os dados atuais com barras visuais, estados de alerta e histórico recente.</p>
             </div>
-
-            <div style="background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
-                <h3 style="color: #006b5f; margin-bottom: 10px;">📱 LCD</h3>
-                <p>Visualize os dados como aparecem no display LCD do protótipo.</p>
+            <div class="card">
+                <h3>Modo simulação</h3>
+                <p>Quando o Arduino não está conectado, o sistema usa dados demonstrativos para manter a apresentação funcionando.</p>
             </div>
-
-            <div style="background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
-                <h3 style="color: #006b5f; margin-bottom: 10px;">⚙️ Funcionamento</h3>
-                <p>Entenda como o sistema funciona e o fluxo de operação.</p>
+            <div class="card">
+                <h3>Diagnóstico do sistema</h3>
+                <p>Exibe status do servidor, conexão serial, porta, modo cloud e uso de memória.</p>
             </div>
-
-            <div style="background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
-                <h3 style="color: #006b5f; margin-bottom: 10px;">🔧 Componentes</h3>
-                <p>Conheça os principales componentes utilizados no projeto.</p>
-            </div>
-
-            <div style="background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
-                <h3 style="color: #006b5f; margin-bottom: 10px;">ℹ️ Sobre</h3>
-                <p>Informações gerais e detalhes do projeto mecatrônico.</p>
+            <div class="card">
+                <h3>Documentação do protótipo</h3>
+                <p>Organiza componentes, funcionamento, LCD e conexões para facilitar explicações técnicas.</p>
             </div>
         </div>
     </section>
 
     <footer>
-        <p>
-            Projeto: Sistema Mecatrônico Automatizado | CETEP-RM | Camaçari - BA | 2026
-        </p>
+        <p>Projeto: Sistema Mecatrônico Automatizado | CETEP-RM | Camaçari - BA | 2026</p>
     </footer>
-
 </body>
 
 </html>

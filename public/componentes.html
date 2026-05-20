@@ -4,130 +4,64 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Componentes do Sistema Mecatrônico" />
-    <meta name="keywords" content="Arduino, componentes, hardware, sensores" />
+    <meta name="description" content="Componentes do Sistema Mecatrônico." />
     <meta name="author" content="CETEP-RM" />
     <meta name="theme-color" content="#005f56" />
     <meta name="color-scheme" content="light dark" />
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='75' font-size='75' fill='%23005f56'>⚡</text></svg>" />
     <title>Componentes - Sistema Mecatrônico</title>
-    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="css/style.css" />
 </head>
 
 <body>
-
     <header>
         <h1>Sistema Mecatrônico Automatizado</h1>
-        <p>
-            Painel local de acompanhamento das leituras do sistema de controle de água, energia e alimentação solar.
-        </p>
+        <p>Painel local de acompanhamento das leituras do sistema de controle de água, energia e alimentação solar.</p>
     </header>
 
     <nav>
-        <a href="index.html">🏠 Início</a>
+        <a href="index.html">Início</a>
         <a href="painel.html">Painel</a>
         <a href="lcd.html">LCD</a>
         <a href="funcionamento.html">Funcionamento</a>
-        <a href="componentes.html">Componentes</a>
+        <a href="componentes.html" aria-current="page">Componentes</a>
+        <a href="simulacao.html">Simulação</a>
+        <a href="diagnostico.html">Diagnóstico</a>
         <a href="sobre.html">Sobre</a>
     </nav>
 
     <section>
-        <h2 class="titulo-secao">🔧 Principais Componentes</h2>
-
-        <p class="texto">
-            Conheça todos os componentes utilizados no projeto. Cada um desempenha um papel fundamental no funcionamento do sistema mecatrônico.
-        </p>
+        <h2 class="titulo-secao">Principais componentes</h2>
+        <p class="texto">Cada componente cumpre uma função no controle de água, energia e comunicação do protótipo.</p>
 
         <div class="componentes">
-            <div class="item">
-                <strong>🤖 Arduino Uno:</strong>
-                <p>Microcontrolador principal que controla todo o sistema.</p>
-            </div>
-
-            <div class="item">
-                <strong>💧 Sensores de nível:</strong>
-                <p>Detectam o nível de água no reservatório (baixo, médio ou cheio).</p>
-            </div>
-
-            <div class="item">
-                <strong>🔌 Relé 5V:</strong>
-                <p>Funciona como chave eletrônica para acionamento da bomba.</p>
-            </div>
-
-            <div class="item">
-                <strong>⚙️ Bomba 12V:</strong>
-                <p>Realiza o abastecimento/distribuição de água no sistema.</p>
-            </div>
-
-            <div class="item">
-                <strong>⚡ ACS712:</strong>
-                <p>Sensor de corrente que mede o consumo elétrico do sistema.</p>
-            </div>
-
-            <div class="item">
-                <strong>📊 Sensores de tensão:</strong>
-                <p>Medem a tensão da bateria e da placa solar em tempo real.</p>
-            </div>
-
-            <div class="item">
-                <strong>☀️ Placa solar:</strong>
-                <p>Gera energia para carregar a bateria através da radiação solar.</p>
-            </div>
-
-            <div class="item">
-                <strong>🔋 Bateria 12V:</strong>
-                <p>Armazena energia para funcionamento do sistema em períodos sem sol.</p>
-            </div>
-
-            <div class="item">
-                <strong>⬇️ Conversor Buck:</strong>
-                <p>Reduz a tensão de 12V para 5V necessária por alguns componentes.</p>
-            </div>
-
-            <div class="item">
-                <strong>📱 LCD I2C 16x2:</strong>
-                <p>Display que mostra as leituras em tempo real no protótipo.</p>
-            </div>
+            <div class="item"><strong>Arduino Uno</strong><p>Microcontrolador principal que coordena sensores, bomba e comunicação serial.</p></div>
+            <div class="item"><strong>Sensores de nível</strong><p>Detectam se o reservatório está baixo, médio ou cheio.</p></div>
+            <div class="item"><strong>Relé 5V</strong><p>Funciona como chave eletrônica para acionamento da bomba.</p></div>
+            <div class="item"><strong>Bomba 12V</strong><p>Realiza o abastecimento ou distribuição de água.</p></div>
+            <div class="item"><strong>ACS712</strong><p>Sensor de corrente usado para medir consumo elétrico.</p></div>
+            <div class="item"><strong>Sensores de tensão</strong><p>Medem tensão da bateria e da placa solar.</p></div>
+            <div class="item"><strong>Placa solar</strong><p>Gera energia para manter a bateria carregada.</p></div>
+            <div class="item"><strong>Bateria 12V</strong><p>Armazena energia para funcionamento sem sol direto.</p></div>
+            <div class="item"><strong>Conversor Buck</strong><p>Reduz 12V para 5V quando necessário.</p></div>
+            <div class="item"><strong>LCD I2C 16x2</strong><p>Exibe leituras diretamente no protótipo.</p></div>
         </div>
 
-        <div style="margin-top: 50px; padding: 25px; background: white; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
-            <h3 style="color: #006b5f; margin-bottom: 15px; font-size: 18px;">📋 Resumo Técnico</h3>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
-                <div>
-                    <strong style="color: #006b5f;">Tensão de Operação:</strong>
-                    <p>12V (bateria) / 5V (Arduino e periféricos)</p>
-                </div>
-                <div>
-                    <strong style="color: #006b5f;">Tensão Solar:</strong>
-                    <p>18-20V (placa solar típica)</p>
-                </div>
-                <div>
-                    <strong style="color: #006b5f;">Comunicação:</strong>
-                    <p>USB Serial (9600 baud rate)</p>
-                </div>
-                <div>
-                    <strong style="color: #006b5f;">Sensores de Nível:</strong>
-                    <p>3 entradas analógicas (A0, A1, A2)</p>
-                </div>
-                <div>
-                    <strong style="color: #006b5f;">Controle de Bomba:</strong>
-                    <p>1 saída digital + Relé 5V</p>
-                </div>
-                <div>
-                    <strong style="color: #006b5f;">Display LCD:</strong>
-                    <p>I2C (SDA: A4, SCL: A5 no Arduino Uno)</p>
-                </div>
+        <div class="info-box">
+            <h3>Resumo técnico</h3>
+            <div class="resumo-grid">
+                <p><strong>Operação:</strong> 12V bateria / 5V Arduino.</p>
+                <p><strong>Comunicação:</strong> USB serial em 9600 baud.</p>
+                <p><strong>Nível de água:</strong> A0, A1 e A2.</p>
+                <p><strong>Controle de bomba:</strong> saída digital + relé 5V.</p>
+                <p><strong>LCD:</strong> I2C com SDA e SCL.</p>
+                <p><strong>Energia:</strong> bateria com recarga solar.</p>
             </div>
         </div>
     </section>
 
     <footer>
-        <p>
-            Projeto: Sistema Mecatrônico Automatizado | CETEP-RM | Camaçari - BA | 2026
-        </p>
+        <p>Projeto: Sistema Mecatrônico Automatizado | CETEP-RM | Camaçari - BA | 2026</p>
     </footer>
-
 </body>
 
 </html>

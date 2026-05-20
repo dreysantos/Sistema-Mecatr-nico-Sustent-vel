@@ -4,107 +4,72 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Como funciona o Sistema Mecatrônico" />
-    <meta name="keywords" content="Arduino, automação, funcionamento, fluxo" />
+    <meta name="description" content="Como funciona o Sistema Mecatrônico." />
     <meta name="author" content="CETEP-RM" />
     <meta name="theme-color" content="#005f56" />
     <meta name="color-scheme" content="light dark" />
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='75' font-size='75' fill='%23005f56'>⚡</text></svg>" />
     <title>Funcionamento - Sistema Mecatrônico</title>
-    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="css/style.css" />
 </head>
 
 <body>
-
     <header>
         <h1>Sistema Mecatrônico Automatizado</h1>
-        <p>
-            Painel local de acompanhamento das leituras do sistema de controle de água, energia e alimentação solar.
-        </p>
+        <p>Painel local de acompanhamento das leituras do sistema de controle de água, energia e alimentação solar.</p>
     </header>
 
     <nav>
-        <a href="index.html">🏠 Início</a>
+        <a href="index.html">Início</a>
         <a href="painel.html">Painel</a>
         <a href="lcd.html">LCD</a>
-        <a href="funcionamento.html">Funcionamento</a>
+        <a href="funcionamento.html" aria-current="page">Funcionamento</a>
         <a href="componentes.html">Componentes</a>
+        <a href="simulacao.html">Simulação</a>
+        <a href="diagnostico.html">Diagnóstico</a>
         <a href="sobre.html">Sobre</a>
     </nav>
 
     <section>
-        <h2 class="titulo-secao">⚙️ Como o Sistema Funciona</h2>
-
-        <p class="texto">
-            O sistema utiliza sensores para monitorar o nível da água, a corrente elétrica, a tensão da bateria e a tensão recebida pela placa solar. O Arduino processa essas informações e controla a bomba por meio de um relé.
-        </p>
+        <h2 class="titulo-secao">Como o sistema funciona</h2>
+        <p class="texto">O Arduino processa sensores de água, corrente, bateria e placa solar. Com essas leituras, ele controla a bomba e envia os dados para o servidor web.</p>
 
         <div class="grid-explicacao">
-
             <div class="etapa">
-                <h3>1. 📡 Leitura dos sensores</h3>
-                <p>
-                    Os sensores identificam o nível da água, a corrente consumida, a tensão da bateria e a tensão da placa solar. Todos os dados são coletados continuamente.
-                </p>
+                <h3>1. Leitura dos sensores</h3>
+                <p>Os sensores identificam nível de água, corrente consumida, tensão da bateria e tensão da placa solar.</p>
             </div>
-
             <div class="etapa">
-                <h3>2. 🔧 Processamento no Arduino</h3>
-                <p>
-                    O Arduino recebe os sinais dos sensores e decide se a bomba deve ligar, desligar ou permanecer pausada com base na lógica programada.
-                </p>
+                <h3>2. Processamento no Arduino</h3>
+                <p>O Arduino interpreta os sinais e decide se a bomba deve ligar, desligar ou permanecer pausada.</p>
             </div>
-
             <div class="etapa">
-                <h3>3. 🔌 Controle da bomba</h3>
-                <p>
-                    O relé funciona como uma chave eletrônica, permitindo controlar a bomba de água com segurança através de um sinal do Arduino.
-                </p>
+                <h3>3. Controle da bomba</h3>
+                <p>O relé funciona como chave eletrônica para acionar a bomba de água com segurança.</p>
             </div>
-
             <div class="etapa">
-                <h3>4. ⚡ Monitoramento energético</h3>
-                <p>
-                    O sistema acompanha a bateria, a placa solar e o consumo elétrico para evitar falhas ou funcionamento inadequado do equipamento.
-                </p>
+                <h3>4. Monitoramento energético</h3>
+                <p>O sistema acompanha bateria, placa solar e consumo para evitar falhas de energia.</p>
             </div>
-
             <div class="etapa">
-                <h3>5. 🌐 Exibição no site</h3>
-                <p>
-                    As informações enviadas pelo Arduino são recebidas pelo servidor local e exibidas neste painel em tempo real via navegador web.
-                </p>
+                <h3>5. Exibição no site</h3>
+                <p>As informações chegam ao servidor Node.js por USB serial e são exibidas em tempo real no navegador.</p>
             </div>
-
             <div class="etapa">
-                <h3>6. 🚨 Alertas do sistema</h3>
-                <p>
-                    Caso ocorra bateria baixa ou corrente alta, o site mostra uma mensagem de alerta visual para facilitar o acompanhamento e evitar problemas.
-                </p>
+                <h3>6. Alertas visuais</h3>
+                <p>Condições como bateria baixa ou corrente alta aparecem com destaque no painel.</p>
             </div>
-
         </div>
 
-        <div style="margin-top: 50px; padding: 25px; background: #f0f8f6; border-radius: 12px; border-left: 5px solid #1ea672;">
-            <h3 style="color: #006b5f; margin-bottom: 15px; font-size: 18px;">📊 Fluxo de Dados</h3>
-            <p style="font-family: monospace; line-height: 2; color: #1d2b2a; font-size: 14px;">
-                <strong>Sensores</strong> → <strong>Arduino</strong> → <strong>Lógica de Controle</strong> → <strong>Relé/Bomba</strong>
-                <br/> ↓
-                <br/>
-                <strong>Dados JSON</strong> → <strong>USB Serial</strong> → <strong>Servidor Node.js</strong> → <strong>Navegador Web</strong>
-                <br/> ↓
-                <br/>
-                <strong>Painel em Tempo Real</strong> + <strong>Alertas Visuais</strong>
-            </p>
+        <div class="info-box">
+            <h3>Fluxo de dados</h3>
+            <p><strong>Sensores</strong> -> <strong>Arduino</strong> -> <strong>Lógica de controle</strong> -> <strong>Relé/Bomba</strong></p>
+            <p><strong>JSON serial</strong> -> <strong>Servidor Node.js</strong> -> <strong>Navegador</strong> -> <strong>Painel em tempo real</strong></p>
         </div>
     </section>
 
     <footer>
-        <p>
-            Projeto: Sistema Mecatrônico Automatizado | CETEP-RM | Camaçari - BA | 2026
-        </p>
+        <p>Projeto: Sistema Mecatrônico Automatizado | CETEP-RM | Camaçari - BA | 2026</p>
     </footer>
-
 </body>
 
 </html>

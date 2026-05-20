@@ -1,94 +1,249 @@
-﻿let ultimoErro = null;
+let ultimoErro = null;
 let tentativasConexao = 0;
+let historicoLocal = [];
 
-function atualizarStatusConexao(online = false, conexaoArduino = "offline") {
-    const ponto = document.getElementById("pontoConexao");
-    const texto = document.getElementById("textoConexao");
+const ids = {
+    pontoConexao: "pontoConexao",
+    textoConexao: "textoConexao",
+    nivelAgua: "nivelAgua",
+    statusBomba: "statusBomba",
+    corrente: "corrente",
+    bateria: "bateria",
+    solar: "solar",
+    alerta: "alerta",
+    barraNivel: "barraNivel",
+    barraBateria: "barraBateria",
+    barraSolar: "barraSolar",
+    barraCorrente: "barraCorrente",
+    lcdLinha1: "lcdLinha1",
+    lcdLinha2: "lcdLinha2",
+    lcdLinha3: "lcdLinha3",
+    lcdLinha4: "lcdLinha4",
+    graficoHistorico: "graficoHistorico"
+};
 
-    if (online && conexaoArduino === "online") {
-        ponto.className = "ponto-conexao online";
-        texto.innerText = `Online - Arduino atualizado as ${new Date().toLocaleTimeString("pt-BR")}`;
-        tentativasConexao = 0;
-    } else if (online) {
-        ponto.className = "ponto-conexao offline";
-        texto.innerText = "Site online - Arduino sem sinal no momento";
-        tentativasConexao = 0;
-    } else {
-        ponto.className = "ponto-conexao offline";
-        texto.innerText = "Offline - Reconectando...";
+function elemento(id) {
+    return document.getElementById(id);
+}
+
+function texto(id, valor) {
+    const el = elemento(id);
+    if (el) {
+        el.innerText = valor;
     }
 }
 
-async function buscarDadosArduino() {
+function atualizarStatusConexao(online = false, conexaoArduino = "offline", simulado = false) {
+    const ponto = elemento(ids.pontoConexao);
+    const label = elemento(ids.textoConexao);
+
+    if (!ponto || !label) {
+        return;
+    }
+
+    if (online && conexaoArduino === "online" && !simulado) {
+        ponto.className = "ponto-conexao online";
+        label.innerText = `Online - Arduino atualizado às ${new Date().toLocaleTimeString("pt-BR")}`;
+        tentativasConexao = 0;
+        return;
+    }
+
+    if (online && simulado) {
+        ponto.className = "ponto-conexao simulado";
+        label.innerText = "Modo simulação - dados demonstrativos ativos";
+        tentativasConexao = 0;
+        return;
+    }
+
+    if (online) {
+        ponto.className = "ponto-conexao simulado";
+        label.innerText = "Site online - aguardando sinal do Arduino";
+        tentativasConexao = 0;
+        return;
+    }
+
+    ponto.className = "ponto-conexao offline";
+    label.innerText = "Offline - reconectando...";
+}
+
+function limparClasses() {
+    [ids.nivelAgua, ids.statusBomba, ids.bateria, ids.alerta, ids.corrente, ids.solar].forEach((id) => {
+        const el = elemento(id);
+        if (el) {
+            el.className = "valor";
+        }
+    });
+}
+
+function definirClasseStatus(id, classe) {
+    const el = elemento(id);
+    if (el) {
+        el.classList.add(classe);
+    }
+}
+
+function percentualNivel(nivel) {
+    if (nivel === "CHEIO") return 100;
+    if (nivel === "MEDIO") return 55;
+    if (nivel === "BAIXO") return 22;
+    return 8;
+}
+
+function atualizarBarra(id, percentual, classe = "normal") {
+    const barra = elemento(id);
+    if (!barra) {
+        return;
+    }
+
+    const preenchimento = barra.querySelector("span");
+    barra.className = `barra-medidor ${classe}`;
+    if (preenchimento) {
+        preenchimento.style.width = `${Math.max(0, Math.min(100, percentual))}%`;
+    }
+}
+
+function atualizarLCD(linha1, linha2, linha3, linha4) {
+    texto(ids.lcdLinha1, linha1);
+    texto(ids.lcdLinha2, linha2);
+    texto(ids.lcdLinha3, linha3);
+    texto(ids.lcdLinha4, linha4);
+}
+
+function desenharGrafico() {
+    const canvas = elemento(ids.graficoHistorico);
+    if (!canvas || historicoLocal.length < 2) {
+        return;
+    }
+
+    const ctx = canvas.getContext("2d");
+    const dpr = window.devicePixelRatio || 1;
+    const largura = canvas.clientWidth;
+    const altura = canvas.clientHeight;
+    canvas.width = largura * dpr;
+    canvas.height = altura * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, largura, altura);
+
+    const padding = 28;
+    const pontos = historicoLocal.slice(-30);
+    const maxX = Math.max(1, pontos.length - 1);
+
+    ctx.strokeStyle = "#d5e4e5";
+    ctx.lineWidth = 1;
+    for (let i = 0; i <= 4; i++) {
+        const y = padding + ((altura - padding * 2) / 4) * i;
+        ctx.beginPath();
+        ctx.moveTo(padding, y);
+        ctx.lineTo(largura - padding, y);
+        ctx.stroke();
+    }
+
+    desenharLinha(ctx, pontos, "cargaBateria", "#16804f", largura, altura, padding, maxX, 100);
+    desenharLinha(ctx, pontos, "tensaoSolar", "#2c9fbe", largura, altura, padding, maxX, 25);
+}
+
+function desenharLinha(ctx, pontos, campo, cor, largura, altura, padding, maxX, maxY) {
+    ctx.strokeStyle = cor;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+
+    pontos.forEach((ponto, index) => {
+        const x = padding + ((largura - padding * 2) / maxX) * index;
+        const y = altura - padding - (Math.min(maxY, Number(ponto[campo]) || 0) / maxY) * (altura - padding * 2);
+
+        if (index === 0) {
+            ctx.moveTo(x, y);
+        } else {
+            ctx.lineTo(x, y);
+        }
+    });
+
+    ctx.stroke();
+}
+
+function atualizarPainel(dados) {
+    atualizarStatusConexao(true, dados.conexao, dados.simulado);
+    ultimoErro = null;
+
+    const nivel = dados.nivel || "INDEFINIDO";
+    const bomba = dados.bomba || "INDEFINIDO";
+    const corrente = Number(dados.corrente) || 0;
+    const tensaoBateria = Number(dados.tensaoBateria) || 0;
+    const cargaBateria = Number(dados.cargaBateria) || 0;
+    const tensaoSolar = Number(dados.tensaoSolar) || 0;
+    const alerta = dados.alerta || "INDEFINIDO";
+
+    texto(ids.nivelAgua, nivel);
+    texto(ids.statusBomba, bomba);
+    texto(ids.corrente, `${corrente.toFixed(2)} A`);
+    texto(ids.bateria, `${tensaoBateria.toFixed(1)}V - ${Math.round(cargaBateria)}%`);
+    texto(ids.solar, `${tensaoSolar.toFixed(1)} V`);
+    texto(ids.alerta, alerta);
+
+    limparClasses();
+
+    definirClasseStatus(ids.alerta, alerta === "NORMAL" ? "status-normal" : "status-alerta");
+    definirClasseStatus(ids.nivelAgua, nivel === "CHEIO" ? "status-normal" : nivel === "MEDIO" ? "status-atencao" : "status-alerta");
+    definirClasseStatus(ids.statusBomba, bomba === "LIGADA" ? "status-atencao" : "status-normal");
+    definirClasseStatus(ids.bateria, tensaoBateria < 11.5 ? "status-alerta" : cargaBateria < 35 ? "status-atencao" : "status-normal");
+    definirClasseStatus(ids.corrente, corrente > 4 ? "status-alerta" : "status-normal");
+    definirClasseStatus(ids.solar, tensaoSolar < 10 ? "status-atencao" : "status-normal");
+
+    atualizarBarra(ids.barraNivel, percentualNivel(nivel), nivel === "BAIXO" ? "alerta" : nivel === "MEDIO" ? "atencao" : "normal");
+    atualizarBarra(ids.barraBateria, cargaBateria, cargaBateria < 25 ? "alerta" : cargaBateria < 45 ? "atencao" : "normal");
+    atualizarBarra(ids.barraSolar, (tensaoSolar / 22) * 100, tensaoSolar < 10 ? "atencao" : "normal");
+    atualizarBarra(ids.barraCorrente, (corrente / 8) * 100, corrente > 4 ? "alerta" : "normal");
+
+    atualizarLCD(
+        "TANQUE DE AGUA",
+        `NIVEL: ${nivel}`,
+        `BAT:${tensaoBateria.toFixed(1)}V ${Math.round(cargaBateria)}%`,
+        `SOLAR:${tensaoSolar.toFixed(1)}V`
+    );
+
+    historicoLocal.push({
+        cargaBateria,
+        tensaoSolar,
+        corrente,
+        horario: dados.ultimaAtualizacao
+    });
+
+    if (historicoLocal.length > 60) {
+        historicoLocal = historicoLocal.slice(-60);
+    }
+
+    desenharGrafico();
+}
+
+async function buscarJSON(url) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
+
     try {
-        const resposta = await fetch("/dados", {
-            timeout: 5000,
-            method: "GET"
+        const resposta = await fetch(url, {
+            method: "GET",
+            signal: controller.signal
         });
 
         if (!resposta.ok) {
             throw new Error(`HTTP ${resposta.status}`);
         }
 
-        const dados = await resposta.json();
+        return await resposta.json();
+    } finally {
+        clearTimeout(timeout);
+    }
+}
 
-        // Validar dados antes de usar
+async function buscarDadosArduino() {
+    try {
+        const dados = await buscarJSON("/dados");
+
         if (!dados || typeof dados !== "object") {
-            throw new Error("Dados invÃ¡lidos recebidos");
+            throw new Error("Dados inválidos recebidos");
         }
 
-        // Atualizar status de conexÃ£o
-        atualizarStatusConexao(true, dados.conexao);
-        ultimoErro = null;
-
-        // Atualizar valores com fallback
-        document.getElementById("nivelAgua").innerText = dados.nivel || "INDEFINIDO";
-        document.getElementById("statusBomba").innerText = dados.bomba || "INDEFINIDO";
-        document.getElementById("corrente").innerText = (Number(dados.corrente) || 0).toFixed(2) + " A";
-
-        document.getElementById("bateria").innerText =
-            (Number(dados.tensaoBateria) || 0).toFixed(1) + "V - " + (dados.cargaBateria || 0) + "%";
-
-        document.getElementById("solar").innerText =
-            (Number(dados.tensaoSolar) || 0).toFixed(1) + " V";
-
-        document.getElementById("alerta").innerText = dados.alerta || "INDEFINIDO";
-
-        limparClasses();
-
-        if (dados.alerta === "NORMAL") {
-            document.getElementById("alerta").classList.add("status-normal");
-        } else {
-            document.getElementById("alerta").classList.add("status-alerta");
-        }
-
-        if (dados.nivel === "CHEIO") {
-            document.getElementById("nivelAgua").classList.add("status-normal");
-        } else if (dados.nivel === "BAIXO" || dados.nivel === "MEDIO") {
-            document.getElementById("nivelAgua").classList.add("status-atencao");
-        } else {
-            document.getElementById("nivelAgua").classList.add("status-alerta");
-        }
-
-        if (dados.bomba === "LIGADA") {
-            document.getElementById("statusBomba").classList.add("status-atencao");
-        } else {
-            document.getElementById("statusBomba").classList.add("status-normal");
-        }
-
-        if (Number(dados.tensaoBateria) < 11.5) {
-            document.getElementById("bateria").classList.add("status-alerta");
-        } else {
-            document.getElementById("bateria").classList.add("status-normal");
-        }
-
-        atualizarLCD(
-            "TANQUE DE AGUA",
-            "NIVEL: " + (dados.nivel || "---"),
-            "BAT:" + (Number(dados.tensaoBateria) || 0).toFixed(1) + "V " + (dados.cargaBateria || 0) + "%",
-            "SOLAR:" + (Number(dados.tensaoSolar) || 0).toFixed(1) + "V"
-        );
-
+        atualizarPainel(dados);
     } catch (erro) {
         atualizarStatusConexao(false);
         tentativasConexao++;
@@ -101,38 +256,55 @@ async function buscarDadosArduino() {
     }
 }
 
-// Atualizar a cada 1 segundo, com tratamento de erros
-let intervalo = setInterval(buscarDadosArduino, 1000);
-buscarDadosArduino();
-
-// Parar atualizaÃ§Ã£o se houver muitas falhas consecutivas
-setInterval(() => {
-    if (tentativasConexao > 30) {
-        console.error("Muitas falhas na conexÃ£o. Verifique se o servidor estÃ¡ rodando.");
-        clearInterval(intervalo);
+async function carregarDiagnostico() {
+    const container = elemento("diagnosticoDados");
+    if (!container) {
+        return;
     }
-}, 5000);
 
-// FunÃ§Ãµes auxiliares
-function limparClasses() {
-    const elementos = [
-        "nivelAgua",
-        "statusBomba",
-        "bateria",
-        "alerta"
-    ];
+    try {
+        const dados = await buscarJSON("/diagnostico");
+        container.innerHTML = "";
 
-    elementos.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) {
-            el.className = "valor";
+        const itens = [
+            ["Servidor", dados.statusServidor],
+            ["Arduino", dados.conexaoArduino],
+            ["Modo cloud", dados.modoCloud ? "Ativo" : "Inativo"],
+            ["Simulação automática", dados.simulacaoAutomatica ? "Ativa" : "Inativa"],
+            ["Porta Arduino", dados.portaArduino],
+            ["Baud rate", dados.baudRate],
+            ["Última atualização", dados.ultimaAtualizacao],
+            ["Histórico", `${dados.leiturasNoHistorico} leituras`],
+            ["Uptime", `${dados.uptimeSegundos}s`],
+            ["Memória", `${dados.memoria.heapUsadoMB} MB heap`]
+        ];
+
+        itens.forEach(([titulo, valor]) => {
+            const item = document.createElement("div");
+            item.className = "diagnostico-item";
+            item.innerHTML = `<strong>${titulo}</strong><p>${valor}</p>`;
+            container.appendChild(item);
+        });
+    } catch (erro) {
+        container.innerHTML = `<div class="diagnostico-item"><strong>Erro</strong><p>${erro.message}</p></div>`;
+    }
+}
+
+if (elemento(ids.nivelAgua) || elemento(ids.lcdLinha1)) {
+    buscarDadosArduino();
+    const intervalo = setInterval(buscarDadosArduino, 1000);
+
+    setInterval(() => {
+        if (tentativasConexao > 30) {
+            console.error("Muitas falhas na conexão. Verifique se o servidor está rodando.");
+            clearInterval(intervalo);
         }
-    });
+    }, 5000);
 }
 
-function atualizarLCD(linha1, linha2, linha3, linha4) {
-    document.getElementById("lcdLinha1").innerText = linha1;
-    document.getElementById("lcdLinha2").innerText = linha2;
-    document.getElementById("lcdLinha3").innerText = linha3;
-    document.getElementById("lcdLinha4").innerText = linha4;
+if (elemento("diagnosticoDados")) {
+    carregarDiagnostico();
+    setInterval(carregarDiagnostico, 3000);
 }
+
+window.addEventListener("resize", desenharGrafico);
