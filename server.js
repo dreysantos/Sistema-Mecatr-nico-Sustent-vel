@@ -1,6 +1,7 @@
 const express = require("express");
 const path = require("path");
 const os = require("os");
+const fs = require("fs");
 require("dotenv").config();
 
 const app = express();
@@ -16,10 +17,16 @@ const JANELA_TEMPO = Number(process.env.JANELA_TEMPO_MS) || 60000;
 const DIAGNOSTICO_TOKEN = process.env.DIAGNOSTICO_TOKEN || "";
 const TRUST_PROXY = process.env.TRUST_PROXY === "true";
 const CORS_PERMITIDOS = CORS_ORIGEM.split(",").map((origem) => origem.trim()).filter(Boolean);
+const BANCO_ATIVO = process.env.BANCO_ATIVO !== "false";
+const BANCO_ARQUIVO = process.env.BANCO_ARQUIVO || path.join(__dirname, "data", "leituras.jsonl");
+const SALVAR_SIMULADOS = process.env.SALVAR_SIMULADOS !== "false";
+const INTERVALO_GRAVACAO_MS = Number(process.env.INTERVALO_GRAVACAO_MS) || 5000;
 
 let ultimaLeituraReal = 0;
+let ultimaGravacaoBanco = 0;
 let reconexaoAgendada = false;
 let portaSerial = null;
+let filaBanco = Promise.resolve();
 
 let dadosArduino = criarDadosBase(MODO_CLOUD ? "cloud" : "offline");
 let historico = [];
@@ -139,6 +146,79 @@ function criarDadosBase(conexao) {
     };
 }
 
+function criarRegistroLeitura(dados) {
+    return {
+        id: `${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
+        dataISO: new Date().toISOString(),
+        horario: dados.ultimaAtualizacao,
+        nivel: dados.nivel,
+        bomba: dados.bomba,
+        corrente: dados.corrente,
+        tensaoBateria: dados.tensaoBateria,
+        cargaBateria: dados.cargaBateria,
+        tensaoSolar: dados.tensaoSolar,
+        alerta: dados.alerta,
+        conexao: dados.conexao,
+        simulado: Boolean(dados.simulado)
+    };
+}
+
+function inicializarBanco() {
+    if (!BANCO_ATIVO) {
+        return;
+    }
+
+    fs.mkdirSync(path.dirname(BANCO_ARQUIVO), { recursive: true });
+
+    if (!fs.existsSync(BANCO_ARQUIVO)) {
+        fs.writeFileSync(BANCO_ARQUIVO, "", "utf8");
+    }
+
+    historico = lerLeiturasSalvas(LIMITE_HISTORICO);
+}
+
+function lerLeiturasSalvas(limite = LIMITE_HISTORICO) {
+    if (!BANCO_ATIVO || !fs.existsSync(BANCO_ARQUIVO)) {
+        return [];
+    }
+
+    const linhas = fs.readFileSync(BANCO_ARQUIVO, "utf8").trim().split(/\r?\n/).filter(Boolean);
+    return linhas.slice(-limite).map((linha) => {
+        try {
+            return JSON.parse(linha);
+        } catch (erro) {
+            return null;
+        }
+    }).filter(Boolean);
+}
+
+function contarLeiturasSalvas() {
+    if (!BANCO_ATIVO || !fs.existsSync(BANCO_ARQUIVO)) {
+        return 0;
+    }
+
+    const conteudo = fs.readFileSync(BANCO_ARQUIVO, "utf8").trim();
+    return conteudo ? conteudo.split(/\r?\n/).length : 0;
+}
+
+function salvarLeituraBanco(registro) {
+    if (!BANCO_ATIVO || (!SALVAR_SIMULADOS && registro.simulado)) {
+        return;
+    }
+
+    const agora = Date.now();
+    if (registro.simulado && agora - ultimaGravacaoBanco < INTERVALO_GRAVACAO_MS) {
+        return;
+    }
+
+    ultimaGravacaoBanco = agora;
+    filaBanco = filaBanco
+        .then(() => fs.promises.appendFile(BANCO_ARQUIVO, `${JSON.stringify(registro)}\n`, "utf8"))
+        .catch((erro) => {
+            console.error("Erro ao salvar leitura no banco:", erro.message);
+        });
+}
+
 function limitarNumero(valor, minimo, maximo, padrao = 0) {
     const numero = Number(valor);
     if (!Number.isFinite(numero)) {
@@ -178,21 +258,14 @@ function validarDadosArduino(dados) {
 }
 
 function adicionarHistorico(dados) {
-    historico.push({
-        horario: dados.ultimaAtualizacao,
-        nivel: dados.nivel,
-        bomba: dados.bomba,
-        corrente: dados.corrente,
-        tensaoBateria: dados.tensaoBateria,
-        cargaBateria: dados.cargaBateria,
-        tensaoSolar: dados.tensaoSolar,
-        alerta: dados.alerta,
-        simulado: Boolean(dados.simulado)
-    });
+    const registro = criarRegistroLeitura(dados);
+    historico.push(registro);
 
     if (historico.length > LIMITE_HISTORICO) {
         historico = historico.slice(-LIMITE_HISTORICO);
     }
+
+    salvarLeituraBanco(registro);
 }
 
 function gerarDadosSimulados() {
@@ -323,6 +396,16 @@ app.get("/historico", (req, res) => {
     res.json(historico.slice(-LIMITE_HISTORICO));
 });
 
+app.get("/leituras", (req, res) => {
+    if (!diagnosticoAutorizado(req)) {
+        return res.status(401).json({ erro: "Leituras protegidas" });
+    }
+
+    const limite = limitarNumero(req.query.limite, 1, 1000, LIMITE_HISTORICO);
+    res.setHeader("Cache-Control", "no-store");
+    res.json(lerLeiturasSalvas(limite));
+});
+
 app.get("/saude", (req, res) => {
     res.setHeader("Cache-Control", "no-store");
     res.json({
@@ -330,6 +413,8 @@ app.get("/saude", (req, res) => {
         arduino: dadosArduino.conexao,
         modoCloud: MODO_CLOUD,
         simulacaoAutomatica: SIMULACAO_AUTOMATICA,
+        bancoAtivo: BANCO_ATIVO,
+        salvarSimulados: SALVAR_SIMULADOS,
         tempo: new Date().toLocaleTimeString("pt-BR")
     });
 });
@@ -357,6 +442,13 @@ app.get("/diagnostico", (req, res) => {
         conexaoArduino: dadosArduino.conexao,
         ultimaAtualizacao: dadosArduino.ultimaAtualizacao,
         leiturasNoHistorico: historico.length,
+        banco: {
+            ativo: BANCO_ATIVO,
+            arquivo: BANCO_ATIVO ? BANCO_ARQUIVO : "desativado",
+            salvarSimulados: SALVAR_SIMULADOS,
+            intervaloGravacaoMs: INTERVALO_GRAVACAO_MS,
+            leiturasSalvas: contarLeiturasSalvas()
+        },
         memoria: {
             rssMB: Number((process.memoryUsage().rss / 1024 / 1024).toFixed(1)),
             heapUsadoMB: Number((process.memoryUsage().heapUsed / 1024 / 1024).toFixed(1))
@@ -382,6 +474,7 @@ app.listen(PORTA_SITE, "0.0.0.0", () => {
         }
     }
 
+    inicializarBanco();
     console.log(`\nServidor rodando em http://${ipLocal}:${PORTA_SITE}`);
     console.log(`Acesse de outro dispositivo: http://${ipLocal}:${PORTA_SITE}`);
     console.log(`Diagnostico: http://${ipLocal}:${PORTA_SITE}/diagnostico`);

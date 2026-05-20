@@ -47,6 +47,10 @@ LIMITE_REQUISICOES=120
 JANELA_TEMPO_MS=60000
 DIAGNOSTICO_TOKEN=
 TRUST_PROXY=false
+BANCO_ATIVO=true
+BANCO_ARQUIVO=./data/leituras.jsonl
+SALVAR_SIMULADOS=true
+INTERVALO_GRAVACAO_MS=5000
 ```
 
 Para publicação em nuvem, use:
@@ -88,8 +92,34 @@ Valores esperados:
 
 - `GET /dados`: leitura atual. Em cloud/offline pode retornar dados simulados.
 - `GET /historico`: últimas leituras armazenadas.
+- `GET /leituras`: últimas leituras salvas no banco local. Aceita `?limite=100` e respeita `DIAGNOSTICO_TOKEN` quando configurado.
 - `GET /saude`: status simples do servidor.
 - `GET /diagnostico`: status detalhado do servidor, Arduino, memória e histórico.
+
+## Banco de dados local
+
+As leituras são salvas em um banco local no formato JSON Lines, por padrão em:
+
+```text
+data/leituras.jsonl
+```
+
+Cada linha do arquivo representa uma leitura completa com data ISO, horário local, nível de água, bomba, corrente, bateria, placa solar, alerta, conexão e indicação se a leitura foi simulada.
+
+Configurações disponíveis:
+
+```env
+BANCO_ATIVO=true
+BANCO_ARQUIVO=./data/leituras.jsonl
+SALVAR_SIMULADOS=true
+INTERVALO_GRAVACAO_MS=5000
+```
+
+Para consultar as leituras salvas:
+
+```text
+/leituras?limite=100
+```
 
 ## Páginas
 
