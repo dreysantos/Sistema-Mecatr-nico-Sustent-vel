@@ -21,6 +21,8 @@ supabase/schema.sql
 
 3. Clique em **Run**.
 
+Se você já tentou criar antes e deu erro, rode novamente com o arquivo atualizado. Ele usa `create table if not exists`, então pode executar mais de uma vez sem problema.
+
 ## 3. Copiar variáveis
 
 No Supabase, abra **Project Settings > API**.
@@ -75,3 +77,5 @@ Se estiver configurado corretamente, as leituras aparecerão na tabela e ficarã
 ## Segurança
 
 Não coloque `SUPABASE_SERVICE_ROLE_KEY` em arquivos públicos, HTML ou JavaScript. Essa chave deve ficar apenas no `.env` local ou nas variáveis do Render.
+
+O site não usa chave do Supabase no navegador. Quem acessa o banco é apenas o servidor Node.js.
