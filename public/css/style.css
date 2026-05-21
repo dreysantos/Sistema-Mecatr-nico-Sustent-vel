@@ -405,6 +405,46 @@ section h4 {
     box-shadow: var(--shadow);
 }
 
+.modo-box {
+    display: grid;
+    grid-template-columns: 180px minmax(220px, 1fr) auto;
+    gap: 14px;
+    align-items: end;
+    margin: 22px 0;
+    padding: 18px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    box-shadow: var(--shadow);
+}
+
+.modo-box label {
+    display: grid;
+    gap: 7px;
+    color: var(--brand);
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.modo-box select,
+.modo-box input {
+    min-height: 42px;
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface-soft);
+    color: var(--text);
+    font: inherit;
+    padding: 0 11px;
+}
+
+.modo-box p {
+    grid-column: 1 / -1;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
 .consulta-box label {
     display: grid;
     gap: 7px;
@@ -653,6 +693,10 @@ footer p {
     }
 
     .consulta-box {
+        grid-template-columns: 1fr;
+    }
+
+    .modo-box {
         grid-template-columns: 1fr;
     }
 

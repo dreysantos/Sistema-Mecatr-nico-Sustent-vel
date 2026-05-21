@@ -44,6 +44,7 @@ PORTA_ARDUINO=COM3
 BAUD_RATE=9600
 MODO_CLOUD=false
 SIMULACAO_AUTOMATICA=true
+MODO_OPERACAO=automatico
 CORS_ORIGEM=
 LIMITE_HISTORICO=60
 LIMITE_REQUISICOES=120
@@ -98,6 +99,8 @@ Valores esperados:
 ## Rotas
 
 - `GET /dados`: leitura atual. Em cloud/offline pode retornar dados simulados.
+- `GET /modo`: mostra o modo atual do painel.
+- `POST /modo`: altera entre `automatico`, `simulacao` e `arduino`.
 - `GET /historico`: últimas leituras armazenadas.
 - `GET /leituras`: últimas leituras salvas no banco local. Aceita `?limite=100` e respeita `DIAGNOSTICO_TOKEN` quando configurado.
 - `GET /relatorio`: indicadores consolidados das leituras. Aceita `?periodo=hoje`, `?periodo=24h` ou `?periodo=7d`.

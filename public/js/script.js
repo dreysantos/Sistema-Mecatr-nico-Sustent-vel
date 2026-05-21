@@ -349,6 +349,68 @@ function montarQuery(params) {
     return query.toString();
 }
 
+function nomeModo(modo) {
+    const nomes = {
+        automatico: "Automático",
+        simulacao: "Simulação",
+        arduino: "Arduino ativo"
+    };
+    return nomes[modo] || modo || "-";
+}
+
+async function enviarJSON(url, dados) {
+    const resposta = await fetch(url, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(dados)
+    });
+
+    if (!resposta.ok) {
+        throw new Error(`HTTP ${resposta.status}`);
+    }
+
+    return resposta.json();
+}
+
+async function carregarModoOperacao() {
+    const seletor = elemento("modoOperacao");
+    const status = elemento("statusModo");
+    if (!seletor || !status) {
+        return;
+    }
+
+    try {
+        const dados = await buscarJSON("/modo");
+        seletor.value = dados.modo;
+        status.innerText = `Modo atual: ${nomeModo(dados.modo)} | Arduino: ${dados.arduino}`;
+    } catch (erro) {
+        status.innerText = `Não foi possível carregar o modo: ${erro.message}`;
+    }
+}
+
+async function aplicarModoOperacao() {
+    const seletor = elemento("modoOperacao");
+    const status = elemento("statusModo");
+    if (!seletor || !status) {
+        return;
+    }
+
+    const token = tokenAtual("tokenModo");
+    status.innerText = "Aplicando modo...";
+
+    try {
+        const resposta = await enviarJSON(`/modo?${montarQuery({ token })}`, {
+            modo: seletor.value
+        });
+        status.innerText = `Modo atual: ${nomeModo(resposta.modo)}`;
+        buscarDadosArduino();
+    } catch (erro) {
+        status.innerText = `Não foi possível alterar. Se configurou DIAGNOSTICO_TOKEN, informe o token. (${erro.message})`;
+    }
+}
+
 function atualizarStatusLeituras(tipo, mensagem) {
     const status = elemento("statusLeituras");
     if (!status) {
@@ -620,8 +682,10 @@ async function carregarDiagnostico() {
 }
 
 if (elemento(ids.nivelAgua) || elemento(ids.lcdLinha1)) {
+    carregarModoOperacao();
     buscarDadosArduino();
     const intervalo = setInterval(buscarDadosArduino, 1000);
+    elemento("aplicarModo")?.addEventListener("click", aplicarModoOperacao);
 
     setInterval(() => {
         if (tentativasConexao > 30) {

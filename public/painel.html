@@ -41,6 +41,23 @@
             <span id="textoConexao">Aguardando conexão...</span>
         </div>
 
+        <div class="modo-box">
+            <label>
+                Modo do painel
+                <select id="modoOperacao">
+                    <option value="automatico">Automático</option>
+                    <option value="simulacao">Simulação</option>
+                    <option value="arduino">Arduino ativo</option>
+                </select>
+            </label>
+            <label>
+                Token
+                <input id="tokenModo" type="password" autocomplete="off" placeholder="Se configurou DIAGNOSTICO_TOKEN" />
+            </label>
+            <button class="botao-primario botao-consulta" id="aplicarModo" type="button">Aplicar modo</button>
+            <p id="statusModo">Modo atual: carregando...</p>
+        </div>
+
         <div class="painel">
             <div class="card">
                 <h3>Nível da água</h3>

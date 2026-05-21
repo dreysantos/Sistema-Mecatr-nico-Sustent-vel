@@ -27,12 +27,14 @@ const SUPABASE_URL = (process.env.SUPABASE_URL || "").replace(/\/$/, "");
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
 const SUPABASE_TABELA = process.env.SUPABASE_TABELA || "leituras";
 const SUPABASE_ATIVO = Boolean(SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY);
+const MODO_OPERACAO_INICIAL = process.env.MODO_OPERACAO || "automatico";
 
 let ultimaLeituraReal = 0;
 let ultimaGravacaoBanco = 0;
 let reconexaoAgendada = false;
 let portaSerial = null;
 let filaBanco = Promise.resolve();
+let modoOperacao = ["automatico", "simulacao", "arduino"].includes(MODO_OPERACAO_INICIAL) ? MODO_OPERACAO_INICIAL : "automatico";
 
 let dadosArduino = criarDadosBase(MODO_CLOUD ? "cloud" : "offline");
 let historico = [];
@@ -69,6 +71,10 @@ app.use((req, res, next) => {
 });
 
 app.use((req, res, next) => {
+    if (req.method === "POST" && req.path === "/modo") {
+        return next();
+    }
+
     if (!["GET", "HEAD", "OPTIONS"].includes(req.method)) {
         return res.status(405).json({ erro: "Metodo nao permitido" });
     }
@@ -603,13 +609,20 @@ function gerarDadosSimulados() {
 
 function obterDadosAtuais() {
     const semLeituraReal = Date.now() - ultimaLeituraReal > 5000;
-    if (SIMULACAO_AUTOMATICA && (MODO_CLOUD || dadosArduino.conexao !== "online" || semLeituraReal)) {
+    const deveSimular = modoOperacao === "simulacao" ||
+        (modoOperacao === "automatico" && SIMULACAO_AUTOMATICA && (MODO_CLOUD || dadosArduino.conexao !== "online" || semLeituraReal));
+
+    if (deveSimular) {
         const simulado = gerarDadosSimulados();
+        simulado.modoOperacao = modoOperacao;
         adicionarHistorico(simulado);
         return simulado;
     }
 
-    return dadosArduino;
+    return {
+        ...dadosArduino,
+        modoOperacao
+    };
 }
 
 function conectarArduino() {
@@ -699,6 +712,34 @@ app.get("/dados", (req, res) => {
     res.json(obterDadosAtuais());
 });
 
+app.get("/modo", (req, res) => {
+    res.setHeader("Cache-Control", "no-store");
+    res.json({
+        modo: modoOperacao,
+        opcoes: ["automatico", "simulacao", "arduino"],
+        modoCloud: MODO_CLOUD,
+        arduino: dadosArduino.conexao
+    });
+});
+
+app.post("/modo", (req, res) => {
+    if (!diagnosticoAutorizado(req)) {
+        return res.status(401).json({ erro: "Alteracao de modo protegida" });
+    }
+
+    const modo = String(req.body?.modo || "").trim().toLowerCase();
+    if (!["automatico", "simulacao", "arduino"].includes(modo)) {
+        return res.status(400).json({ erro: "Modo invalido" });
+    }
+
+    modoOperacao = modo;
+    res.setHeader("Cache-Control", "no-store");
+    res.json({
+        modo: modoOperacao,
+        mensagem: "Modo atualizado"
+    });
+});
+
 app.get("/historico", (req, res) => {
     res.setHeader("Cache-Control", "no-store");
     res.json(historico.slice(-LIMITE_HISTORICO));
@@ -774,6 +815,7 @@ app.get("/saude", (req, res) => {
     res.json({
         status: "online",
         arduino: dadosArduino.conexao,
+        modoOperacao,
         modoCloud: MODO_CLOUD,
         simulacaoAutomatica: SIMULACAO_AUTOMATICA,
         bancoAtivo: BANCO_ATIVO,
@@ -828,6 +870,7 @@ app.get("/diagnostico", async (req, res) => {
     res.json({
         statusServidor: "online",
         modoCloud: MODO_CLOUD,
+        modoOperacao,
         simulacaoAutomatica: SIMULACAO_AUTOMATICA,
         portaArduino: MODO_CLOUD ? "desativada no modo cloud" : PORTA_ARDUINO,
         baudRate: BAUD_RATE,
