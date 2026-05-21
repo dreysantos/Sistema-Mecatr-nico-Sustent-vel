@@ -363,17 +363,32 @@ async function carregarLeituras() {
 
 async function carregarLinkCelular() {
     const link = elemento("linkCelularLeituras");
-    if (!link) {
+    const linkPublico = elemento("linkPublicoLeituras");
+    if (!link && !linkPublico) {
         return;
     }
 
     try {
         const rede = await buscarJSON("/rede");
         const token = new URLSearchParams(window.location.search).get("token");
-        const url = token ? `${rede.leiturasCelular}?token=${encodeURIComponent(token)}` : rede.leiturasCelular;
-        link.innerText = url;
+        const urlRede = token ? `${rede.leiturasCelular}?token=${encodeURIComponent(token)}` : rede.leiturasCelular;
+        const urlPublica = rede.leiturasPublicas && token ? `${rede.leiturasPublicas}?token=${encodeURIComponent(token)}` : rede.leiturasPublicas;
+
+        if (link) {
+            link.innerText = urlRede;
+        }
+
+        if (linkPublico) {
+            linkPublico.innerText = urlPublica || "Para acessar fora da rede, publique o projeto em uma hospedagem e configure URL_PUBLICA.";
+        }
     } catch (erro) {
-        link.innerText = "Não foi possível identificar o IP da rede. Veja o endereço exibido no terminal do servidor.";
+        if (link) {
+            link.innerText = "Não foi possível identificar o IP da rede. Veja o endereço exibido no terminal do servidor.";
+        }
+
+        if (linkPublico) {
+            linkPublico.innerText = "Não foi possível verificar o acesso público agora.";
+        }
     }
 }
 

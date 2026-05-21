@@ -51,6 +51,7 @@ BANCO_ATIVO=true
 BANCO_ARQUIVO=./data/leituras.jsonl
 SALVAR_SIMULADOS=true
 INTERVALO_GRAVACAO_MS=5000
+URL_PUBLICA=
 ```
 
 Para publicação em nuvem, use:
@@ -129,6 +130,19 @@ Para acessar pelo celular, deixe o celular na mesma rede Wi-Fi do computador e a
 ```
 
 Essa página mostra automaticamente o link completo de rede, como `http://192.168.0.10:3000/leituras.html`.
+
+Se o celular não estiver na mesma rede, o IP local não funciona. Nesse caso, publique o projeto em uma hospedagem como Render ou Railway e configure:
+
+```env
+URL_PUBLICA=https://seu-site.onrender.com
+MODO_CLOUD=true
+```
+
+Depois acesse:
+
+```text
+https://seu-site.onrender.com/leituras.html
+```
 
 ## Páginas
 

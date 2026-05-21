@@ -21,6 +21,7 @@ const BANCO_ATIVO = process.env.BANCO_ATIVO !== "false";
 const BANCO_ARQUIVO = process.env.BANCO_ARQUIVO || path.join(__dirname, "data", "leituras.jsonl");
 const SALVAR_SIMULADOS = process.env.SALVAR_SIMULADOS !== "false";
 const INTERVALO_GRAVACAO_MS = Number(process.env.INTERVALO_GRAVACAO_MS) || 5000;
+const URL_PUBLICA = (process.env.URL_PUBLICA || "").replace(/\/$/, "");
 
 let ultimaLeituraReal = 0;
 let ultimaGravacaoBanco = 0;
@@ -445,7 +446,10 @@ app.get("/rede", (req, res) => {
         mesmoDispositivo: baseLocal,
         celular: baseRede,
         leiturasCelular: `${baseRede}/leituras.html`,
-        painelCelular: `${baseRede}/painel.html`
+        painelCelular: `${baseRede}/painel.html`,
+        urlPublica: URL_PUBLICA,
+        leiturasPublicas: URL_PUBLICA ? `${URL_PUBLICA}/leituras.html` : "",
+        painelPublico: URL_PUBLICA ? `${URL_PUBLICA}/painel.html` : ""
     });
 });
 
