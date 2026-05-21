@@ -451,9 +451,40 @@ function valorCSV(valor) {
 }
 
 function gerarCSV(leituras) {
-    const colunas = ["dataISO", "horario", "nivel", "bomba", "corrente", "tensaoBateria", "cargaBateria", "tensaoSolar", "alerta", "conexao", "simulado"];
-    const linhas = leituras.map((leitura) => colunas.map((coluna) => valorCSV(leitura[coluna])).join(","));
-    return [colunas.join(","), ...linhas].join("\n");
+    const colunas = [
+        "Data e hora",
+        "Horario local",
+        "Nivel da agua",
+        "Status da bomba",
+        "Corrente (A)",
+        "Tensao bateria (V)",
+        "Carga bateria (%)",
+        "Tensao solar (V)",
+        "Alerta",
+        "Conexao",
+        "Origem"
+    ];
+
+    const linhas = leituras.map((leitura) => {
+        const data = leitura.dataISO ? new Date(leitura.dataISO) : null;
+        const dataFormatada = data && !Number.isNaN(data.getTime()) ? data.toLocaleString("pt-BR") : "";
+
+        return [
+            dataFormatada,
+            leitura.horario,
+            leitura.nivel,
+            leitura.bomba,
+            Number(leitura.corrente || 0).toFixed(2),
+            Number(leitura.tensaoBateria || 0).toFixed(1),
+            Math.round(Number(leitura.cargaBateria || 0)),
+            Number(leitura.tensaoSolar || 0).toFixed(1),
+            leitura.alerta,
+            leitura.conexao,
+            leitura.simulado ? "Simulada" : "Arduino"
+        ].map(valorCSV).join(";");
+    });
+
+    return `\uFEFF${[colunas.map(valorCSV).join(";"), ...linhas].join("\n")}`;
 }
 
 function contarLeiturasSalvas() {
@@ -729,7 +760,8 @@ app.get("/exportar.csv", async (req, res) => {
         const leituras = filtrarLeituras(await lerLeiturasBanco(1000), req.query);
         res.setHeader("Cache-Control", "no-store");
         res.setHeader("Content-Type", "text/csv; charset=utf-8");
-        res.setHeader("Content-Disposition", "attachment; filename=\"leituras.csv\"");
+        const dataArquivo = new Date().toISOString().slice(0, 10);
+        res.setHeader("Content-Disposition", `attachment; filename="leituras-${dataArquivo}.csv"`);
         res.send(gerarCSV(leituras));
     } catch (erro) {
         console.error("Erro ao exportar CSV:", erro.message);
