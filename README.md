@@ -7,6 +7,9 @@ Painel de monitoramento em tempo real para um sistema mecatrônico de controle i
 - Monitoramento em tempo real com atualização a cada segundo.
 - Painel visual com barras de nível, bateria, corrente e placa solar.
 - Histórico recente em gráfico no navegador.
+- Relatórios com médias, máximos, mínimos e contagem de alertas.
+- Exportação de leituras em CSV.
+- Tela dedicada de alertas.
 - Modo simulação automático quando o Arduino não está conectado ou quando o projeto roda em nuvem.
 - Página de diagnóstico do servidor e da conexão serial.
 - Validação dos dados recebidos do Arduino.
@@ -97,6 +100,9 @@ Valores esperados:
 - `GET /dados`: leitura atual. Em cloud/offline pode retornar dados simulados.
 - `GET /historico`: últimas leituras armazenadas.
 - `GET /leituras`: últimas leituras salvas no banco local. Aceita `?limite=100` e respeita `DIAGNOSTICO_TOKEN` quando configurado.
+- `GET /relatorio`: indicadores consolidados das leituras. Aceita `?periodo=hoje`, `?periodo=24h` ou `?periodo=7d`.
+- `GET /alertas`: leituras consideradas críticas ou de atenção.
+- `GET /exportar.csv`: exporta leituras em CSV.
 - `GET /rede`: mostra o IP local e links para acessar o painel e as leituras em outro dispositivo.
 - `GET /saude`: status simples do servidor.
 - `GET /diagnostico`: status detalhado do servidor, Arduino, memória e histórico.
@@ -193,6 +199,8 @@ https://seu-site.onrender.com/leituras.html
 - `/index.html`: visão inicial.
 - `/painel.html`: painel em tempo real.
 - `/leituras.html`: consulta visual das leituras salvas no banco.
+- `/relatorios.html`: indicadores consolidados do histórico.
+- `/alertas.html`: eventos importantes e condições de atenção.
 - `/lcd.html`: representação do LCD.
 - `/funcionamento.html`: explicação do fluxo.
 - `/componentes.html`: lista de componentes.

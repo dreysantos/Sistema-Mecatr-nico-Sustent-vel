@@ -364,10 +364,96 @@ function lerLeiturasSalvas(limite = LIMITE_HISTORICO) {
 
 async function lerLeiturasBanco(limite = LIMITE_HISTORICO) {
     if (SUPABASE_ATIVO) {
-        return lerLeiturasSupabase(limite);
+        try {
+            return await lerLeiturasSupabase(limite);
+        } catch (erro) {
+            console.error("Erro ao ler Supabase, usando fallback local:", erro.message);
+            return lerLeiturasSalvas(limite);
+        }
     }
 
     return lerLeiturasSalvas(limite);
+}
+
+function obterInicioPeriodo(periodo, inicio) {
+    if (inicio) {
+        const data = new Date(inicio);
+        return Number.isNaN(data.getTime()) ? null : data;
+    }
+
+    const agora = new Date();
+    if (periodo === "hoje") {
+        return new Date(agora.getFullYear(), agora.getMonth(), agora.getDate());
+    }
+    if (periodo === "24h") {
+        return new Date(Date.now() - 24 * 60 * 60 * 1000);
+    }
+    if (periodo === "7d") {
+        return new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    }
+    return null;
+}
+
+function filtrarLeituras(leituras, query) {
+    const inicio = obterInicioPeriodo(query.periodo, query.inicio);
+    const fim = query.fim ? new Date(query.fim) : null;
+
+    return leituras.filter((leitura) => {
+        const data = new Date(leitura.dataISO || leitura.created_at || 0);
+        if (Number.isNaN(data.getTime())) {
+            return true;
+        }
+        if (inicio && data < inicio) {
+            return false;
+        }
+        if (fim && !Number.isNaN(fim.getTime()) && data > fim) {
+            return false;
+        }
+        return true;
+    });
+}
+
+function calcularRelatorio(leituras) {
+    const total = leituras.length;
+    const soma = (campo) => leituras.reduce((acc, item) => acc + (Number(item[campo]) || 0), 0);
+    const max = (campo) => total ? Math.max(...leituras.map((item) => Number(item[campo]) || 0)) : 0;
+    const min = (campo) => total ? Math.min(...leituras.map((item) => Number(item[campo]) || 0)) : 0;
+    const alertas = leituras.filter((item) => item.alerta && item.alerta !== "NORMAL").length;
+    const bombaLigada = leituras.filter((item) => item.bomba === "LIGADA").length;
+    const ultima = leituras[leituras.length - 1] || null;
+
+    return {
+        total,
+        mediaBateria: total ? Number((soma("cargaBateria") / total).toFixed(1)) : 0,
+        mediaSolar: total ? Number((soma("tensaoSolar") / total).toFixed(1)) : 0,
+        maiorCorrente: Number(max("corrente").toFixed(2)),
+        menorBateria: Number(min("cargaBateria").toFixed(1)),
+        menorSolar: Number(min("tensaoSolar").toFixed(1)),
+        alertas,
+        bombaLigada,
+        ultima
+    };
+}
+
+function selecionarAlertas(leituras) {
+    return leituras.filter((leitura) => {
+        return leitura.alerta && leitura.alerta !== "NORMAL" ||
+            leitura.bomba === "LIGADA" ||
+            Number(leitura.cargaBateria) < 25 ||
+            Number(leitura.corrente) > 4 ||
+            Number(leitura.tensaoSolar) < 10;
+    });
+}
+
+function valorCSV(valor) {
+    const texto = String(valor ?? "");
+    return `"${texto.replaceAll('"', '""')}"`;
+}
+
+function gerarCSV(leituras) {
+    const colunas = ["dataISO", "horario", "nivel", "bomba", "corrente", "tensaoBateria", "cargaBateria", "tensaoSolar", "alerta", "conexao", "simulado"];
+    const linhas = leituras.map((leitura) => colunas.map((coluna) => valorCSV(leitura[coluna])).join(","));
+    return [colunas.join(","), ...linhas].join("\n");
 }
 
 function contarLeiturasSalvas() {
@@ -596,10 +682,58 @@ app.get("/leituras", async (req, res) => {
     res.setHeader("Cache-Control", "no-store");
 
     try {
-        res.json(await lerLeiturasBanco(limite));
+        const leituras = await lerLeiturasBanco(limite);
+        res.json(filtrarLeituras(leituras, req.query));
     } catch (erro) {
         console.error("Erro ao consultar leituras:", erro.message);
         res.status(500).json({ erro: "Nao foi possivel consultar as leituras." });
+    }
+});
+
+app.get("/relatorio", async (req, res) => {
+    if (!diagnosticoAutorizado(req)) {
+        return res.status(401).json({ erro: "Relatorio protegido" });
+    }
+
+    try {
+        const leituras = filtrarLeituras(await lerLeiturasBanco(1000), req.query);
+        res.setHeader("Cache-Control", "no-store");
+        res.json(calcularRelatorio(leituras));
+    } catch (erro) {
+        console.error("Erro ao gerar relatorio:", erro.message);
+        res.status(500).json({ erro: "Nao foi possivel gerar o relatorio." });
+    }
+});
+
+app.get("/alertas", async (req, res) => {
+    if (!diagnosticoAutorizado(req)) {
+        return res.status(401).json({ erro: "Alertas protegidos" });
+    }
+
+    try {
+        const leituras = filtrarLeituras(await lerLeiturasBanco(1000), req.query);
+        res.setHeader("Cache-Control", "no-store");
+        res.json(selecionarAlertas(leituras).slice(-200));
+    } catch (erro) {
+        console.error("Erro ao consultar alertas:", erro.message);
+        res.status(500).json({ erro: "Nao foi possivel consultar alertas." });
+    }
+});
+
+app.get("/exportar.csv", async (req, res) => {
+    if (!diagnosticoAutorizado(req)) {
+        return res.status(401).type("text/plain").send("Exportacao protegida");
+    }
+
+    try {
+        const leituras = filtrarLeituras(await lerLeiturasBanco(1000), req.query);
+        res.setHeader("Cache-Control", "no-store");
+        res.setHeader("Content-Type", "text/csv; charset=utf-8");
+        res.setHeader("Content-Disposition", "attachment; filename=\"leituras.csv\"");
+        res.send(gerarCSV(leituras));
+    } catch (erro) {
+        console.error("Erro ao exportar CSV:", erro.message);
+        res.status(500).type("text/plain").send("Nao foi possivel exportar CSV.");
     }
 });
 
@@ -655,6 +789,7 @@ app.get("/diagnostico", async (req, res) => {
         leiturasSalvas = SUPABASE_ATIVO ? await contarLeiturasSupabase() : contarLeiturasSalvas();
     } catch (erro) {
         console.error("Erro ao contar leituras:", erro.message);
+        leiturasSalvas = contarLeiturasSalvas();
     }
 
     res.setHeader("Cache-Control", "no-store");

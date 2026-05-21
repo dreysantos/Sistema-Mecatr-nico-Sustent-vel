@@ -312,6 +312,20 @@ function classeAlerta(alerta) {
     return alerta ? "erro" : "aviso";
 }
 
+function tokenAtual(idCampo) {
+    return elemento(idCampo)?.value || new URLSearchParams(window.location.search).get("token") || "";
+}
+
+function montarQuery(params) {
+    const query = new URLSearchParams();
+    Object.entries(params).forEach(([chave, valor]) => {
+        if (valor) {
+            query.set(chave, valor);
+        }
+    });
+    return query.toString();
+}
+
 function atualizarStatusLeituras(tipo, mensagem) {
     const status = elemento("statusLeituras");
     if (!status) {
@@ -356,6 +370,7 @@ function renderizarTabelaLeituras(leituras) {
 
     if (leituras.length === 0) {
         tabela.innerHTML = `<tr><td colspan="8">Nenhuma leitura salva ainda. Abra o painel, aguarde alguns segundos e atualize esta página.</td></tr>`;
+        renderizarCardsLeituras([]);
         return;
     }
 
@@ -376,6 +391,30 @@ function renderizarTabelaLeituras(leituras) {
             </tr>
         `;
     }).join("");
+
+    renderizarCardsLeituras(leituras);
+}
+
+function renderizarCardsLeituras(leituras) {
+    const cards = elemento("cardsLeituras");
+    if (!cards) {
+        return;
+    }
+
+    if (leituras.length === 0) {
+        cards.innerHTML = "";
+        return;
+    }
+
+    cards.innerHTML = leituras.slice().reverse().map((leitura) => `
+        <div class="diagnostico-item leitura-card">
+            <strong>${escaparHTML(formatarDataLeitura(leitura))}</strong>
+            <p>Nível: ${escaparHTML(leitura.nivel || "-")} | Bomba: ${escaparHTML(leitura.bomba || "-")}</p>
+            <p>Bateria: ${Number(leitura.tensaoBateria || 0).toFixed(1)}V / ${Math.round(Number(leitura.cargaBateria || 0))}%</p>
+            <p>Solar: ${Number(leitura.tensaoSolar || 0).toFixed(1)}V | Corrente: ${Number(leitura.corrente || 0).toFixed(2)}A</p>
+            <p>Alerta: ${escaparHTML(leitura.alerta || "-")}</p>
+        </div>
+    `).join("");
 }
 
 async function carregarLeituras() {
@@ -385,10 +424,11 @@ async function carregarLeituras() {
     }
 
     const limite = elemento("limiteLeituras")?.value || "50";
+    const periodo = elemento("periodoLeituras")?.value || "";
     const tokenCampo = elemento("tokenLeituras");
     const tokenUrl = new URLSearchParams(window.location.search).get("token");
     const token = tokenCampo?.value || tokenUrl || "";
-    const url = token ? `/leituras?limite=${encodeURIComponent(limite)}&token=${encodeURIComponent(token)}` : `/leituras?limite=${encodeURIComponent(limite)}`;
+    const url = `/leituras?${montarQuery({ limite, periodo, token })}`;
 
     if (tokenCampo && tokenUrl && !tokenCampo.value) {
         tokenCampo.value = tokenUrl;
@@ -405,6 +445,95 @@ async function carregarLeituras() {
         tabela.innerHTML = `<tr><td colspan="8">Não foi possível carregar. Se configurou DIAGNOSTICO_TOKEN, informe o token acima.</td></tr>`;
         atualizarResumoLeituras([]);
         atualizarStatusLeituras("erro", `Erro ao consultar o banco: ${erro.message}`);
+    }
+}
+
+function exportarLeituras() {
+    const limite = elemento("limiteLeituras")?.value || "250";
+    const periodo = elemento("periodoLeituras")?.value || "";
+    const token = tokenAtual("tokenLeituras");
+    window.location.href = `/exportar.csv?${montarQuery({ limite, periodo, token })}`;
+}
+
+async function carregarRelatorio() {
+    const container = elemento("cardsRelatorio");
+    if (!container) {
+        return;
+    }
+
+    const periodo = elemento("periodoRelatorio")?.value || "";
+    const token = tokenAtual("tokenRelatorio");
+
+    try {
+        const relatorio = await buscarJSON(`/relatorio?${montarQuery({ periodo, token })}`);
+        const ultima = relatorio.ultima;
+        container.innerHTML = `
+            <div class="diagnostico-item"><strong>Total de leituras</strong><p>${relatorio.total}</p></div>
+            <div class="diagnostico-item"><strong>Bateria média</strong><p>${relatorio.mediaBateria}%</p></div>
+            <div class="diagnostico-item"><strong>Solar média</strong><p>${relatorio.mediaSolar}V</p></div>
+            <div class="diagnostico-item"><strong>Maior corrente</strong><p>${relatorio.maiorCorrente}A</p></div>
+            <div class="diagnostico-item"><strong>Menor bateria</strong><p>${relatorio.menorBateria}%</p></div>
+            <div class="diagnostico-item"><strong>Menor solar</strong><p>${relatorio.menorSolar}V</p></div>
+            <div class="diagnostico-item"><strong>Alertas</strong><p>${relatorio.alertas}</p></div>
+            <div class="diagnostico-item"><strong>Bomba ligada</strong><p>${relatorio.bombaLigada} leituras</p></div>
+            <div class="diagnostico-item"><strong>Última leitura</strong><p>${ultima ? escaparHTML(formatarDataLeitura(ultima)) : "Sem dados"}</p></div>
+        `;
+    } catch (erro) {
+        container.innerHTML = `<div class="diagnostico-item"><strong>Erro</strong><p>${erro.message}</p></div>`;
+    }
+}
+
+async function carregarAlertas() {
+    const container = elemento("listaAlertas");
+    if (!container) {
+        return;
+    }
+
+    const periodo = elemento("periodoAlertas")?.value || "";
+    const token = tokenAtual("tokenAlertas");
+
+    try {
+        const alertas = await buscarJSON(`/alertas?${montarQuery({ periodo, token })}`);
+        if (!alertas.length) {
+            container.innerHTML = `<div class="diagnostico-item"><strong>Nenhum alerta</strong><p>Não há eventos críticos no período.</p></div>`;
+            return;
+        }
+
+        container.innerHTML = alertas.slice().reverse().map((leitura) => `
+            <div class="diagnostico-item alerta-card">
+                <strong>${escaparHTML(leitura.alerta || "EVENTO")}</strong>
+                <p>${escaparHTML(formatarDataLeitura(leitura))}</p>
+                <p>Nível ${escaparHTML(leitura.nivel || "-")} | Bomba ${escaparHTML(leitura.bomba || "-")}</p>
+                <p>Bateria ${Math.round(Number(leitura.cargaBateria || 0))}% | Solar ${Number(leitura.tensaoSolar || 0).toFixed(1)}V | Corrente ${Number(leitura.corrente || 0).toFixed(2)}A</p>
+            </div>
+        `).join("");
+    } catch (erro) {
+        container.innerHTML = `<div class="diagnostico-item"><strong>Erro</strong><p>${erro.message}</p></div>`;
+    }
+}
+
+async function carregarDashboardHome() {
+    const container = elemento("dashboardHome");
+    if (!container) {
+        return;
+    }
+
+    try {
+        const [dados, relatorio, saude] = await Promise.all([
+            buscarJSON("/dados"),
+            buscarJSON("/relatorio"),
+            buscarJSON("/saude")
+        ]);
+
+        container.innerHTML = `
+            <div class="diagnostico-item"><strong>Nível atual</strong><p>${escaparHTML(dados.nivel || "-")}</p></div>
+            <div class="diagnostico-item"><strong>Bateria atual</strong><p>${Number(dados.tensaoBateria || 0).toFixed(1)}V / ${Math.round(Number(dados.cargaBateria || 0))}%</p></div>
+            <div class="diagnostico-item"><strong>Total salvo</strong><p>${relatorio.total} leituras recentes</p></div>
+            <div class="diagnostico-item"><strong>Último alerta</strong><p>${escaparHTML(dados.alerta || "-")}</p></div>
+            <div class="diagnostico-item"><strong>Banco</strong><p>${saude.bancoTipo === "supabase" ? "Supabase" : "Arquivo local"}</p></div>
+        `;
+    } catch (erro) {
+        container.innerHTML = `<div class="diagnostico-item"><strong>Resumo indisponível</strong><p>${erro.message}</p></div>`;
     }
 }
 
@@ -450,6 +579,8 @@ async function carregarDiagnostico() {
             ["Baud rate", dados.baudRate],
             ["Última atualização", dados.ultimaAtualizacao],
             ["Histórico", `${dados.leiturasNoHistorico} leituras`],
+            ["Banco", dados.banco?.tipo === "supabase" ? "Supabase" : "Arquivo local"],
+            ["Leituras salvas", `${dados.banco?.leiturasSalvas ?? 0}`],
             ["Uptime", `${dados.uptimeSegundos}s`],
             ["Memória", `${dados.memoria.heapUsadoMB} MB heap`]
         ];
@@ -486,6 +617,24 @@ if (elemento("tabelaLeituras")) {
     carregarLeituras();
     elemento("atualizarLeituras")?.addEventListener("click", carregarLeituras);
     elemento("limiteLeituras")?.addEventListener("change", carregarLeituras);
+    elemento("periodoLeituras")?.addEventListener("change", carregarLeituras);
+    elemento("exportarLeituras")?.addEventListener("click", exportarLeituras);
+}
+
+if (elemento("cardsRelatorio")) {
+    carregarRelatorio();
+    elemento("atualizarRelatorio")?.addEventListener("click", carregarRelatorio);
+    elemento("periodoRelatorio")?.addEventListener("change", carregarRelatorio);
+}
+
+if (elemento("listaAlertas")) {
+    carregarAlertas();
+    elemento("atualizarAlertas")?.addEventListener("click", carregarAlertas);
+    elemento("periodoAlertas")?.addEventListener("change", carregarAlertas);
+}
+
+if (elemento("dashboardHome")) {
+    carregarDashboardHome();
 }
 
 window.addEventListener("resize", desenharGrafico);

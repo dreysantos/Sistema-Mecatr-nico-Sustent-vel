@@ -162,6 +162,10 @@ section {
     cursor: pointer;
 }
 
+.botao-secundario {
+    background: var(--accent);
+}
+
 .painel,
 .grid-explicacao,
 .componentes,
@@ -425,6 +429,24 @@ section h4 {
     margin-top: 22px;
 }
 
+.cards-lista {
+    display: grid;
+    gap: 14px;
+    margin-top: 16px;
+}
+
+#cardsLeituras {
+    display: none;
+}
+
+.alerta-card {
+    border-left: 5px solid var(--danger);
+}
+
+.leitura-card {
+    border-left: 5px solid var(--accent);
+}
+
 .tabela-scroll {
     width: 100%;
     overflow-x: auto;
@@ -598,6 +620,14 @@ footer p {
 
     .consulta-box {
         grid-template-columns: 1fr;
+    }
+
+    #cardsLeituras {
+        display: grid;
+    }
+
+    .tabela-scroll {
+        display: none;
     }
 
     .card {
