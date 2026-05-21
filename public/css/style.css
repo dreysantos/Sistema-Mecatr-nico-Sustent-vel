@@ -425,23 +425,6 @@ section h4 {
     margin-top: 22px;
 }
 
-.acesso-celular {
-    margin: 24px 0 8px;
-}
-
-.link-rede {
-    display: block;
-    margin: 12px 0;
-    padding: 13px 14px;
-    border: 1px dashed var(--accent);
-    border-radius: var(--radius);
-    background: var(--surface-soft);
-    color: var(--brand) !important;
-    font-size: 17px !important;
-    font-weight: 800;
-    overflow-wrap: anywhere;
-}
-
 .tabela-scroll {
     width: 100%;
     overflow-x: auto;

@@ -361,23 +361,6 @@ async function carregarLeituras() {
     }
 }
 
-async function carregarLinkCelular() {
-    const linkPublico = elemento("linkPublicoLeituras");
-    if (!linkPublico) {
-        return;
-    }
-
-    try {
-        const rede = await buscarJSON("/rede");
-        const token = new URLSearchParams(window.location.search).get("token");
-        const urlPublica = rede.leiturasPublicas && token ? `${rede.leiturasPublicas}?token=${encodeURIComponent(token)}` : rede.leiturasPublicas;
-
-        linkPublico.innerText = urlPublica || "Para acessar fora da rede, publique o projeto em uma hospedagem e configure URL_PUBLICA.";
-    } catch (erro) {
-        linkPublico.innerText = "Não foi possível verificar o acesso público agora.";
-    }
-}
-
 async function buscarDadosArduino() {
     try {
         const dados = await buscarJSON("/dados");
@@ -453,7 +436,6 @@ if (elemento("diagnosticoDados")) {
 }
 
 if (elemento("tabelaLeituras")) {
-    carregarLinkCelular();
     carregarLeituras();
     elemento("atualizarLeituras")?.addEventListener("click", carregarLeituras);
     elemento("limiteLeituras")?.addEventListener("change", carregarLeituras);
