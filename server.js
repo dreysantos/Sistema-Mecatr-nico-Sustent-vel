@@ -161,6 +161,35 @@ function obterIpLocal() {
     return "localhost";
 }
 
+function hostEhLocal(host) {
+    const nome = String(host || "").split(":")[0];
+    return nome === "localhost" ||
+        nome === "127.0.0.1" ||
+        nome.startsWith("10.") ||
+        nome.startsWith("192.168.") ||
+        nome.startsWith("172.16.") ||
+        nome.startsWith("172.17.") ||
+        nome.startsWith("172.18.") ||
+        nome.startsWith("172.19.") ||
+        nome.startsWith("172.2") ||
+        nome.startsWith("172.30.") ||
+        nome.startsWith("172.31.");
+}
+
+function obterUrlPublica(req) {
+    if (URL_PUBLICA) {
+        return URL_PUBLICA;
+    }
+
+    const host = req.headers["x-forwarded-host"] || req.headers.host;
+    if (!host || hostEhLocal(host)) {
+        return "";
+    }
+
+    const protocolo = req.headers["x-forwarded-proto"] || (req.secure ? "https" : "http");
+    return `${protocolo}://${host}`;
+}
+
 function criarRegistroLeitura(dados) {
     return {
         id: `${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
@@ -438,6 +467,7 @@ app.get("/rede", (req, res) => {
     const ipLocal = obterIpLocal();
     const baseLocal = `http://localhost:${PORTA_SITE}`;
     const baseRede = `http://${ipLocal}:${PORTA_SITE}`;
+    const urlPublica = obterUrlPublica(req);
 
     res.setHeader("Cache-Control", "no-store");
     res.json({
@@ -447,9 +477,9 @@ app.get("/rede", (req, res) => {
         celular: baseRede,
         leiturasCelular: `${baseRede}/leituras.html`,
         painelCelular: `${baseRede}/painel.html`,
-        urlPublica: URL_PUBLICA,
-        leiturasPublicas: URL_PUBLICA ? `${URL_PUBLICA}/leituras.html` : "",
-        painelPublico: URL_PUBLICA ? `${URL_PUBLICA}/painel.html` : ""
+        urlPublica,
+        leiturasPublicas: urlPublica ? `${urlPublica}/leituras.html` : "",
+        painelPublico: urlPublica ? `${urlPublica}/painel.html` : ""
     });
 });
 
