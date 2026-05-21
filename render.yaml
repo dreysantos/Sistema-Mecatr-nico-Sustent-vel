@@ -8,5 +8,9 @@ services:
     envVars:
       - key: MODO_CLOUD
         value: "true"
+      - key: URL_PUBLICA
+        value: "https://sistema-mecatronico-sustentavel.onrender.com"
+      - key: TRUST_PROXY
+        value: "true"
       - key: BAUD_RATE
         value: "9600"
