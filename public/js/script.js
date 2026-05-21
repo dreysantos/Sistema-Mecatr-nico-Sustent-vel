@@ -42,6 +42,29 @@ function texto(id, valor) {
     }
 }
 
+function configurarBotaoTopo() {
+    const botao = document.createElement("button");
+    botao.type = "button";
+    botao.className = "botao-topo";
+    botao.setAttribute("aria-label", "Voltar ao topo");
+    botao.innerText = "↑";
+    document.body.appendChild(botao);
+
+    function atualizarVisibilidade() {
+        botao.classList.toggle("visivel", window.scrollY > 360);
+    }
+
+    botao.addEventListener("click", () => {
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+    });
+
+    window.addEventListener("scroll", atualizarVisibilidade, { passive: true });
+    atualizarVisibilidade();
+}
+
 function atualizarStatusConexao(online = false, conexaoArduino = "offline", simulado = false) {
     const ponto = elemento(ids.pontoConexao);
     const label = elemento(ids.textoConexao);
@@ -638,3 +661,4 @@ if (elemento("dashboardHome")) {
 }
 
 window.addEventListener("resize", desenharGrafico);
+configurarBotaoTopo();
