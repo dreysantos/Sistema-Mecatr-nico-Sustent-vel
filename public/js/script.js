@@ -133,32 +133,63 @@ function desenharGrafico() {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, largura, altura);
 
-    const padding = 28;
+    const paddingEsquerda = 52;
+    const paddingDireita = 58;
+    const paddingTopo = 28;
+    const paddingBaixo = 34;
     const pontos = historicoLocal.slice(-30);
     const maxX = Math.max(1, pontos.length - 1);
+    const area = {
+        esquerda: paddingEsquerda,
+        direita: largura - paddingDireita,
+        topo: paddingTopo,
+        baixo: altura - paddingBaixo
+    };
 
+    ctx.font = "12px Arial";
+    ctx.textBaseline = "middle";
     ctx.strokeStyle = "#d5e4e5";
+    ctx.fillStyle = "#5d706e";
     ctx.lineWidth = 1;
+
     for (let i = 0; i <= 4; i++) {
-        const y = padding + ((altura - padding * 2) / 4) * i;
+        const y = area.topo + ((area.baixo - area.topo) / 4) * i;
+        const bateria = 100 - i * 25;
+        const solar = 25 - i * 6.25;
+
         ctx.beginPath();
-        ctx.moveTo(padding, y);
-        ctx.lineTo(largura - padding, y);
+        ctx.moveTo(area.esquerda, y);
+        ctx.lineTo(area.direita, y);
         ctx.stroke();
+
+        ctx.textAlign = "right";
+        ctx.fillText(`${bateria}%`, area.esquerda - 8, y);
+
+        ctx.textAlign = "left";
+        ctx.fillText(`${solar.toFixed(solar % 1 === 0 ? 0 : 1)}V`, area.direita + 8, y);
     }
 
-    desenharLinha(ctx, pontos, "cargaBateria", "#16804f", largura, altura, padding, maxX, 100);
-    desenharLinha(ctx, pontos, "tensaoSolar", "#2c9fbe", largura, altura, padding, maxX, 25);
+    ctx.textBaseline = "alphabetic";
+    ctx.textAlign = "left";
+    ctx.fillStyle = "#16804f";
+    ctx.fillText("Bateria (%)", area.esquerda, 16);
+    ctx.fillStyle = "#2c9fbe";
+    ctx.textAlign = "right";
+    ctx.fillText("Solar (V)", area.direita, 16);
+
+    desenharLinha(ctx, pontos, "cargaBateria", "#16804f", area, maxX, 100, "%");
+    desenharLinha(ctx, pontos, "tensaoSolar", "#2c9fbe", area, maxX, 25, "V");
 }
 
-function desenharLinha(ctx, pontos, campo, cor, largura, altura, padding, maxX, maxY) {
+function desenharLinha(ctx, pontos, campo, cor, area, maxX, maxY, unidade) {
     ctx.strokeStyle = cor;
     ctx.lineWidth = 3;
     ctx.beginPath();
 
     pontos.forEach((ponto, index) => {
-        const x = padding + ((largura - padding * 2) / maxX) * index;
-        const y = altura - padding - (Math.min(maxY, Number(ponto[campo]) || 0) / maxY) * (altura - padding * 2);
+        const valor = Math.min(maxY, Number(ponto[campo]) || 0);
+        const x = area.esquerda + ((area.direita - area.esquerda) / maxX) * index;
+        const y = area.baixo - (valor / maxY) * (area.baixo - area.topo);
 
         if (index === 0) {
             ctx.moveTo(x, y);
@@ -168,6 +199,22 @@ function desenharLinha(ctx, pontos, campo, cor, largura, altura, padding, maxX, 
     });
 
     ctx.stroke();
+
+    const ultimo = pontos[pontos.length - 1];
+    const valorFinal = Math.min(maxY, Number(ultimo[campo]) || 0);
+    const xFinal = area.direita;
+    const yFinal = area.baixo - (valorFinal / maxY) * (area.baixo - area.topo);
+    const casas = unidade === "%" ? 0 : 1;
+
+    ctx.fillStyle = cor;
+    ctx.beginPath();
+    ctx.arc(xFinal, yFinal, 4, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.font = "12px Arial";
+    ctx.textAlign = "left";
+    ctx.textBaseline = "middle";
+    ctx.fillText(`${valorFinal.toFixed(casas)}${unidade}`, xFinal + 8, yFinal);
 }
 
 function atualizarPainel(dados) {
