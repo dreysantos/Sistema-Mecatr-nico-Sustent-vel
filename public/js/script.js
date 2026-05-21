@@ -681,11 +681,14 @@ async function carregarDiagnostico() {
     }
 }
 
-if (elemento(ids.nivelAgua) || elemento(ids.lcdLinha1)) {
+if (elemento("modoOperacao")) {
     carregarModoOperacao();
+    elemento("aplicarModo")?.addEventListener("click", aplicarModoOperacao);
+}
+
+if (elemento(ids.nivelAgua) || elemento(ids.lcdLinha1)) {
     buscarDadosArduino();
     const intervalo = setInterval(buscarDadosArduino, 1000);
-    elemento("aplicarModo")?.addEventListener("click", aplicarModoOperacao);
 
     setInterval(() => {
         if (tentativasConexao > 30) {
