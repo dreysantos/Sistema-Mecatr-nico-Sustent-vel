@@ -128,6 +128,12 @@ Para consultar as leituras salvas:
 
 ## Banco online com Supabase
 
+O projeto já inclui os arquivos prontos:
+
+- `supabase/schema.sql`: cria a tabela `leituras`.
+- `SUPABASE_SETUP.md`: passo a passo para configurar no Supabase e no Render.
+- `.env.example`: modelo de variáveis de ambiente.
+
 Crie uma tabela no Supabase usando este SQL:
 
 ```sql
