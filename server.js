@@ -2,6 +2,7 @@ const express = require("express");
 const path = require("path");
 const os = require("os");
 const fs = require("fs");
+const https = require("https");
 require("dotenv").config();
 
 const app = express();
@@ -22,6 +23,10 @@ const BANCO_ARQUIVO = process.env.BANCO_ARQUIVO || path.join(__dirname, "data", 
 const SALVAR_SIMULADOS = process.env.SALVAR_SIMULADOS !== "false";
 const INTERVALO_GRAVACAO_MS = Number(process.env.INTERVALO_GRAVACAO_MS) || 5000;
 const URL_PUBLICA = (process.env.URL_PUBLICA || "").replace(/\/$/, "");
+const SUPABASE_URL = (process.env.SUPABASE_URL || "").replace(/\/$/, "");
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+const SUPABASE_TABELA = process.env.SUPABASE_TABELA || "leituras";
+const SUPABASE_ATIVO = Boolean(SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY);
 
 let ultimaLeituraReal = 0;
 let ultimaGravacaoBanco = 0;
@@ -208,7 +213,7 @@ function criarRegistroLeitura(dados) {
 }
 
 function inicializarBanco() {
-    if (!BANCO_ATIVO) {
+    if (!BANCO_ATIVO || SUPABASE_ATIVO) {
         return;
     }
 
@@ -219,6 +224,127 @@ function inicializarBanco() {
     }
 
     historico = lerLeiturasSalvas(LIMITE_HISTORICO);
+}
+
+function registroParaSupabase(registro) {
+    return {
+        data_iso: registro.dataISO,
+        horario: registro.horario,
+        nivel: registro.nivel,
+        bomba: registro.bomba,
+        corrente: registro.corrente,
+        tensao_bateria: registro.tensaoBateria,
+        carga_bateria: registro.cargaBateria,
+        tensao_solar: registro.tensaoSolar,
+        alerta: registro.alerta,
+        conexao: registro.conexao,
+        simulado: registro.simulado
+    };
+}
+
+function supabaseParaRegistro(registro) {
+    return {
+        id: String(registro.id || ""),
+        dataISO: registro.data_iso || registro.created_at || "",
+        horario: registro.horario || "",
+        nivel: registro.nivel || "",
+        bomba: registro.bomba || "",
+        corrente: Number(registro.corrente) || 0,
+        tensaoBateria: Number(registro.tensao_bateria) || 0,
+        cargaBateria: Number(registro.carga_bateria) || 0,
+        tensaoSolar: Number(registro.tensao_solar) || 0,
+        alerta: registro.alerta || "",
+        conexao: registro.conexao || "",
+        simulado: Boolean(registro.simulado)
+    };
+}
+
+function supabaseRequest(metodo, caminho, corpo = null, cabecalhosExtras = {}) {
+    return new Promise((resolve, reject) => {
+        const url = new URL(`${SUPABASE_URL}/rest/v1/${caminho}`);
+        const payload = corpo ? JSON.stringify(corpo) : null;
+
+        const req = https.request({
+            method: metodo,
+            hostname: url.hostname,
+            path: `${url.pathname}${url.search}`,
+            headers: {
+                apikey: SUPABASE_SERVICE_ROLE_KEY,
+                Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+                "Content-Type": "application/json",
+                ...cabecalhosExtras
+            }
+        }, (res) => {
+            let dados = "";
+
+            res.on("data", (chunk) => {
+                dados += chunk;
+            });
+
+            res.on("end", () => {
+                if (res.statusCode < 200 || res.statusCode >= 300) {
+                    return reject(new Error(`Supabase HTTP ${res.statusCode}: ${dados.substring(0, 200)}`));
+                }
+
+                if (!dados) {
+                    return resolve({ dados: null, headers: res.headers });
+                }
+
+                try {
+                    resolve({ dados: JSON.parse(dados), headers: res.headers });
+                } catch (erro) {
+                    reject(new Error("Resposta invalida do Supabase"));
+                }
+            });
+        });
+
+        req.on("error", reject);
+
+        if (payload) {
+            req.write(payload);
+        }
+
+        req.end();
+    });
+}
+
+async function salvarLeituraSupabase(registro) {
+    if (!SUPABASE_ATIVO) {
+        return false;
+    }
+
+    await supabaseRequest("POST", SUPABASE_TABELA, registroParaSupabase(registro), {
+        Prefer: "return=minimal"
+    });
+    return true;
+}
+
+async function lerLeiturasSupabase(limite = LIMITE_HISTORICO) {
+    if (!SUPABASE_ATIVO) {
+        return [];
+    }
+
+    const query = new URLSearchParams({
+        select: "*",
+        order: "data_iso.desc",
+        limit: String(limite)
+    });
+
+    const resposta = await supabaseRequest("GET", `${SUPABASE_TABELA}?${query.toString()}`);
+    return (resposta.dados || []).map(supabaseParaRegistro).reverse();
+}
+
+async function contarLeiturasSupabase() {
+    if (!SUPABASE_ATIVO) {
+        return 0;
+    }
+
+    const resposta = await supabaseRequest("GET", `${SUPABASE_TABELA}?select=id&limit=1`, null, {
+        Prefer: "count=exact"
+    });
+    const contentRange = resposta.headers["content-range"] || "";
+    const total = Number(contentRange.split("/")[1]);
+    return Number.isFinite(total) ? total : 0;
 }
 
 function lerLeiturasSalvas(limite = LIMITE_HISTORICO) {
@@ -234,6 +360,14 @@ function lerLeiturasSalvas(limite = LIMITE_HISTORICO) {
             return null;
         }
     }).filter(Boolean);
+}
+
+async function lerLeiturasBanco(limite = LIMITE_HISTORICO) {
+    if (SUPABASE_ATIVO) {
+        return lerLeiturasSupabase(limite);
+    }
+
+    return lerLeiturasSalvas(limite);
 }
 
 function contarLeiturasSalvas() {
@@ -257,9 +391,22 @@ function salvarLeituraBanco(registro) {
 
     ultimaGravacaoBanco = agora;
     filaBanco = filaBanco
-        .then(() => fs.promises.appendFile(BANCO_ARQUIVO, `${JSON.stringify(registro)}\n`, "utf8"))
+        .then(async () => {
+            if (SUPABASE_ATIVO) {
+                await salvarLeituraSupabase(registro);
+                return;
+            }
+
+            await fs.promises.appendFile(BANCO_ARQUIVO, `${JSON.stringify(registro)}\n`, "utf8");
+        })
         .catch((erro) => {
             console.error("Erro ao salvar leitura no banco:", erro.message);
+
+            if (SUPABASE_ATIVO) {
+                fs.mkdirSync(path.dirname(BANCO_ARQUIVO), { recursive: true });
+                return fs.promises.appendFile(BANCO_ARQUIVO, `${JSON.stringify(registro)}\n`, "utf8")
+                    .catch((erroLocal) => console.error("Erro no fallback local:", erroLocal.message));
+            }
         });
 }
 
@@ -440,14 +587,20 @@ app.get("/historico", (req, res) => {
     res.json(historico.slice(-LIMITE_HISTORICO));
 });
 
-app.get("/leituras", (req, res) => {
+app.get("/leituras", async (req, res) => {
     if (!diagnosticoAutorizado(req)) {
         return res.status(401).json({ erro: "Leituras protegidas" });
     }
 
     const limite = limitarNumero(req.query.limite, 1, 1000, LIMITE_HISTORICO);
     res.setHeader("Cache-Control", "no-store");
-    res.json(lerLeiturasSalvas(limite));
+
+    try {
+        res.json(await lerLeiturasBanco(limite));
+    } catch (erro) {
+        console.error("Erro ao consultar leituras:", erro.message);
+        res.status(500).json({ erro: "Nao foi possivel consultar as leituras." });
+    }
 });
 
 app.get("/saude", (req, res) => {
@@ -458,6 +611,7 @@ app.get("/saude", (req, res) => {
         modoCloud: MODO_CLOUD,
         simulacaoAutomatica: SIMULACAO_AUTOMATICA,
         bancoAtivo: BANCO_ATIVO,
+        bancoTipo: SUPABASE_ATIVO ? "supabase" : "local",
         salvarSimulados: SALVAR_SIMULADOS,
         tempo: new Date().toLocaleTimeString("pt-BR")
     });
@@ -491,9 +645,16 @@ function diagnosticoAutorizado(req) {
     return req.headers["x-diagnostico-token"] === DIAGNOSTICO_TOKEN || req.query.token === DIAGNOSTICO_TOKEN;
 }
 
-app.get("/diagnostico", (req, res) => {
+app.get("/diagnostico", async (req, res) => {
     if (!diagnosticoAutorizado(req)) {
         return res.status(401).json({ erro: "Diagnostico protegido" });
+    }
+
+    let leiturasSalvas = 0;
+    try {
+        leiturasSalvas = SUPABASE_ATIVO ? await contarLeiturasSupabase() : contarLeiturasSalvas();
+    } catch (erro) {
+        console.error("Erro ao contar leituras:", erro.message);
     }
 
     res.setHeader("Cache-Control", "no-store");
@@ -508,10 +669,12 @@ app.get("/diagnostico", (req, res) => {
         leiturasNoHistorico: historico.length,
         banco: {
             ativo: BANCO_ATIVO,
-            arquivo: BANCO_ATIVO ? BANCO_ARQUIVO : "desativado",
+            tipo: SUPABASE_ATIVO ? "supabase" : "local",
+            tabela: SUPABASE_ATIVO ? SUPABASE_TABELA : "",
+            arquivo: BANCO_ATIVO && !SUPABASE_ATIVO ? BANCO_ARQUIVO : "desativado",
             salvarSimulados: SALVAR_SIMULADOS,
             intervaloGravacaoMs: INTERVALO_GRAVACAO_MS,
-            leiturasSalvas: contarLeiturasSalvas()
+            leiturasSalvas
         },
         memoria: {
             rssMB: Number((process.memoryUsage().rss / 1024 / 1024).toFixed(1)),

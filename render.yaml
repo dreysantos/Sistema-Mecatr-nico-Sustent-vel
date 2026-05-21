@@ -12,3 +12,9 @@ services:
         value: "true"
       - key: BAUD_RATE
         value: "9600"
+      - key: SUPABASE_TABELA
+        value: "leituras"
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
