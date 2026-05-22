@@ -471,7 +471,7 @@ function calcularRelatorio(leituras) {
     const soma = (campo) => leituras.reduce((acc, item) => acc + (Number(item[campo]) || 0), 0);
     const max = (campo) => total ? Math.max(...leituras.map((item) => Number(item[campo]) || 0)) : 0;
     const min = (campo) => total ? Math.min(...leituras.map((item) => Number(item[campo]) || 0)) : 0;
-    const alertas = leituras.filter((item) => item.alerta && item.alerta !== "NORMAL").length;
+    const alertas = selecionarAlertas(leituras).length;
     const bombaLigada = leituras.filter((item) => item.bomba === "LIGADA").length;
     const ultima = leituras[leituras.length - 1] || null;
 
@@ -491,6 +491,7 @@ function calcularRelatorio(leituras) {
 function selecionarAlertas(leituras) {
     return leituras.filter((leitura) => {
         return leitura.alerta && leitura.alerta !== "NORMAL" ||
+            leitura.nivel === "CHEIO" ||
             leitura.bomba === "LIGADA" ||
             Number(leitura.cargaBateria) < 25 ||
             Number(leitura.corrente) > 4 ||
@@ -593,6 +594,27 @@ function normalizarTexto(valor, permitidos, padrao) {
     return permitidos.includes(texto) ? texto : padrao;
 }
 
+function definirAlertaLeitura({ alerta, nivel, tensaoBateria, corrente }) {
+    const alertaRecebido = String(alerta || "").trim().toUpperCase();
+    if (alertaRecebido && alertaRecebido !== "NORMAL") {
+        return alertaRecebido.substring(0, 80);
+    }
+
+    if (nivel === "CHEIO") {
+        return "TANQUE CHEIO";
+    }
+
+    if (Number(tensaoBateria) > 0 && Number(tensaoBateria) < 11.5) {
+        return "BATERIA BAIXA";
+    }
+
+    if (Number(corrente) > 4) {
+        return "CORRENTE ALTA";
+    }
+
+    return "NORMAL";
+}
+
 function validarDadosArduino(dados) {
     if (!dados || typeof dados !== "object") {
         return null;
@@ -602,18 +624,18 @@ function validarDadosArduino(dados) {
     const cargaBateria = limitarNumero(dados.cargaBateria, 0, 100);
     const corrente = limitarNumero(dados.corrente, 0, 30);
     const tensaoSolar = limitarNumero(dados.tensaoSolar, 0, 40);
-    const alertaPadrao = tensaoBateria > 0 && tensaoBateria < 11.5 ? "BATERIA BAIXA" : "NORMAL";
+    const nivel = normalizarTexto(dados.nivel, ["BAIXO", "MEDIO", "CHEIO", "INDEFINIDO"], "INDEFINIDO");
 
     const agora = new Date();
 
     return {
-        nivel: normalizarTexto(dados.nivel, ["BAIXO", "MEDIO", "CHEIO", "INDEFINIDO"], "INDEFINIDO"),
+        nivel,
         bomba: normalizarTexto(dados.bomba, ["LIGADA", "DESLIGADA", "PAUSADA", "INDEFINIDO"], "INDEFINIDO"),
         corrente,
         tensaoBateria,
         cargaBateria,
         tensaoSolar,
-        alerta: String(dados.alerta || alertaPadrao).trim().toUpperCase().substring(0, 80),
+        alerta: definirAlertaLeitura({ alerta: dados.alerta, nivel, tensaoBateria, corrente }),
         conexao: "online",
         simulado: false,
         ultimaAtualizacao: agora.toLocaleTimeString("pt-BR"),
@@ -642,7 +664,7 @@ function gerarDadosSimulados() {
     const corrente = limitarNumero(1.8 + Math.abs(Math.sin(segundos / 4)) * 2.4, 0, 8);
     const nivel = bateria < 25 ? "BAIXO" : ciclo > 0.35 ? "CHEIO" : "MEDIO";
     const bomba = bateria < 20 ? "PAUSADA" : nivel === "BAIXO" ? "LIGADA" : "DESLIGADA";
-    const alerta = bateria < 20 ? "BATERIA BAIXA" : corrente > 4 ? "CORRENTE ALTA" : "NORMAL";
+    const alerta = definirAlertaLeitura({ nivel, tensaoBateria, corrente });
 
     return {
         nivel,

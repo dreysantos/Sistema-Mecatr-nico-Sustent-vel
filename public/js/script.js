@@ -288,13 +288,13 @@ function atualizarPainel(dados) {
     limparClasses();
 
     definirClasseStatus(ids.alerta, alerta === "NORMAL" ? "status-normal" : "status-alerta");
-    definirClasseStatus(ids.nivelAgua, nivel === "CHEIO" ? "status-normal" : nivel === "MEDIO" ? "status-atencao" : "status-alerta");
+    definirClasseStatus(ids.nivelAgua, nivel === "CHEIO" ? "status-alerta" : nivel === "MEDIO" ? "status-atencao" : "status-alerta");
     definirClasseStatus(ids.statusBomba, bomba === "LIGADA" ? "status-atencao" : "status-normal");
     definirClasseStatus(ids.bateria, tensaoBateria < 11.5 ? "status-alerta" : cargaBateria < 35 ? "status-atencao" : "status-normal");
     definirClasseStatus(ids.corrente, corrente > 4 ? "status-alerta" : "status-normal");
     definirClasseStatus(ids.solar, tensaoSolar < 10 ? "status-atencao" : "status-normal");
 
-    atualizarBarra(ids.barraNivel, percentualNivel(nivel), nivel === "BAIXO" ? "alerta" : nivel === "MEDIO" ? "atencao" : "normal");
+    atualizarBarra(ids.barraNivel, percentualNivel(nivel), nivel === "CHEIO" || nivel === "BAIXO" ? "alerta" : nivel === "MEDIO" ? "atencao" : "normal");
     atualizarBarra(ids.barraBateria, cargaBateria, cargaBateria < 25 ? "alerta" : cargaBateria < 45 ? "atencao" : "normal");
     atualizarBarra(ids.barraSolar, (tensaoSolar / 22) * 100, tensaoSolar < 10 ? "atencao" : "normal");
     atualizarBarra(ids.barraCorrente, (corrente / 8) * 100, corrente > 4 ? "alerta" : "normal");
@@ -568,7 +568,7 @@ function renderizarTabelaLeituras(leituras) {
         return `
             <tr>
                 <td>${escaparHTML(formatarDataLeitura(leitura))}</td>
-                <td><span class="selo ${leitura.nivel === "CHEIO" ? "ok" : leitura.nivel === "BAIXO" ? "erro" : "aviso"}">${escaparHTML(leitura.nivel || "-")}</span></td>
+                <td><span class="selo ${leitura.nivel === "CHEIO" || leitura.nivel === "BAIXO" ? "erro" : "aviso"}">${escaparHTML(leitura.nivel || "-")}</span></td>
                 <td>${escaparHTML(leitura.bomba || "-")}</td>
                 <td>${Number(leitura.tensaoBateria || 0).toFixed(1)}V / ${Math.round(Number(leitura.cargaBateria || 0))}%</td>
                 <td>${Number(leitura.tensaoSolar || 0).toFixed(1)}V</td>
