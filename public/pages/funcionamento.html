@@ -9,7 +9,7 @@
     <meta name="theme-color" content="#005f56" />
     <meta name="color-scheme" content="light dark" />
     <title>Funcionamento - Sistema Mecatrônico</title>
-    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="/css/style.css" />
 </head>
 
 <body>
@@ -19,17 +19,17 @@
     </header>
 
     <nav>
-        <a href="index.html">Início</a>
-        <a href="painel.html">Painel</a>
-        <a href="leituras.html">Leituras</a>
-        <a href="relatorios.html">Relatórios</a>
-        <a href="alertas.html">Alertas</a>
-        <a href="lcd.html">LCD</a>
-        <a href="funcionamento.html" aria-current="page">Funcionamento</a>
-        <a href="componentes.html">Componentes</a>
-        <a href="simulacao.html">Simulação</a>
-        <a href="diagnostico.html">Diagnóstico</a>
-        <a href="sobre.html">Sobre</a>
+        <a href="/index.html">Início</a>
+        <a href="/painel.html">Painel</a>
+        <a href="/leituras.html">Leituras</a>
+        <a href="/relatorios.html">Relatórios</a>
+        <a href="/alertas.html">Alertas</a>
+        <a href="/lcd.html">LCD</a>
+        <a href="/funcionamento.html" aria-current="page">Funcionamento</a>
+        <a href="/componentes.html">Componentes</a>
+        <a href="/simulacao.html">Simulação</a>
+        <a href="/diagnostico.html">Diagnóstico</a>
+        <a href="/sobre.html">Sobre</a>
     </nav>
 
     <section>
@@ -68,6 +68,17 @@
             <p><strong>Reservatório</strong> -> <strong>Sensores</strong> -> <strong>Arduino</strong> -> <strong>Lógica de controle</strong> -> <strong>Relé/Bomba</strong></p>
             <p><strong>Placa solar</strong> -> <strong>Controlador de carga</strong> -> <strong>Bateria 12V</strong> -> <strong>Conversor buck 5V</strong></p>
             <p><strong>JSON serial</strong> -> <strong>Servidor Node.js</strong> -> <strong>Navegador</strong> -> <strong>Painel em tempo real</strong></p>
+        </div>
+
+        <div class="info-box">
+            <h3>Funcionamento real e modo simulação</h3>
+            <p>Quando o Arduino está conectado, o servidor recebe as leituras reais pela comunicação USB serial e exibe os dados no painel. Quando o Arduino não está conectado, o sistema pode gerar leituras demonstrativas para manter a apresentação funcionando e mostrar à banca o comportamento esperado do protótipo.</p>
+            <p>Os dados simulados não substituem os testes reais; eles servem para explicar a lógica de controle, os alertas e os estados de funcionamento durante a demonstração.</p>
+        </div>
+
+        <div class="alerta-site">
+            <strong>Segurança elétrica:</strong>
+            <p>Em uma aplicação fora do ambiente de demonstração, a montagem precisa considerar isolamento, fusível, bitola adequada dos fios, proteção contra umidade e fixação segura dos módulos. Esses cuidados reduzem riscos e tornam o protótipo mais confiável.</p>
         </div>
     </section>
 

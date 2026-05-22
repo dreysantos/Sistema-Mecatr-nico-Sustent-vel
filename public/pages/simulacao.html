@@ -9,7 +9,7 @@
     <meta name="theme-color" content="#005f56" />
     <meta name="color-scheme" content="light dark" />
     <title>Simulação - Sistema Mecatrônico</title>
-    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="/css/style.css" />
 </head>
 
 <body>
@@ -19,17 +19,17 @@
     </header>
 
     <nav>
-        <a href="index.html">Início</a>
-        <a href="painel.html">Painel</a>
-        <a href="leituras.html">Leituras</a>
-        <a href="relatorios.html">Relatórios</a>
-        <a href="alertas.html">Alertas</a>
-        <a href="lcd.html">LCD</a>
-        <a href="funcionamento.html">Funcionamento</a>
-        <a href="componentes.html">Componentes</a>
-        <a href="simulacao.html" aria-current="page">Simulação</a>
-        <a href="diagnostico.html">Diagnóstico</a>
-        <a href="sobre.html">Sobre</a>
+        <a href="/index.html">Início</a>
+        <a href="/painel.html">Painel</a>
+        <a href="/leituras.html">Leituras</a>
+        <a href="/relatorios.html">Relatórios</a>
+        <a href="/alertas.html">Alertas</a>
+        <a href="/lcd.html">LCD</a>
+        <a href="/funcionamento.html">Funcionamento</a>
+        <a href="/componentes.html">Componentes</a>
+        <a href="/simulacao.html" aria-current="page">Simulação</a>
+        <a href="/diagnostico.html">Diagnóstico</a>
+        <a href="/sobre.html">Sobre</a>
     </nav>
 
     <section>
@@ -66,6 +66,11 @@
 
         <div class="alerta-site">
             <strong>Modo simulação:</strong> no Wokwi, chaves representam os sensores de nível e potenciômetros representam corrente, bateria e tensão solar. Em nuvem ou sem Arduino conectado, a rota <code>/dados</code> retorna leituras demonstrativas para manter o painel apresentável.
+        </div>
+
+        <div class="info-box">
+            <h3>Transparência na apresentação</h3>
+            <p>Os dados em modo simulação servem para demonstrar o funcionamento esperado do sistema. Quando conectado ao Arduino, o painel pode exibir as leituras reais do protótipo. Essa separação evita confundir demonstração com medição real e deixa claro para a banca quando o sistema está operando com dados físicos ou demonstrativos.</p>
         </div>
 
         <h2 class="titulo-secao">Mapa de conexões</h2>

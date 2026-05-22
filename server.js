@@ -143,6 +143,22 @@ app.use(express.static(path.join(__dirname, "public"), {
     }
 }));
 
+app.get("/:pagina.html", (req, res, next) => {
+    const pagina = req.params.pagina;
+    if (!/^[a-z0-9-]+$/i.test(pagina)) {
+        return next();
+    }
+
+    const arquivoPagina = path.join(__dirname, "public", "pages", `${pagina}.html`);
+    fs.access(arquivoPagina, fs.constants.R_OK, (erro) => {
+        if (erro) {
+            return next();
+        }
+
+        res.sendFile(arquivoPagina);
+    });
+});
+
 function criarDadosBase(conexao) {
     const agora = new Date();
     return {

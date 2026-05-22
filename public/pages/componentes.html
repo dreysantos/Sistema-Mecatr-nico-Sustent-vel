@@ -9,7 +9,7 @@
     <meta name="theme-color" content="#005f56" />
     <meta name="color-scheme" content="light dark" />
     <title>Componentes - Sistema Mecatrônico</title>
-    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="/css/style.css" />
 </head>
 
 <body>
@@ -19,17 +19,17 @@
     </header>
 
     <nav>
-        <a href="index.html">Início</a>
-        <a href="painel.html">Painel</a>
-        <a href="leituras.html">Leituras</a>
-        <a href="relatorios.html">Relatórios</a>
-        <a href="alertas.html">Alertas</a>
-        <a href="lcd.html">LCD</a>
-        <a href="funcionamento.html">Funcionamento</a>
-        <a href="componentes.html" aria-current="page">Componentes</a>
-        <a href="simulacao.html">Simulação</a>
-        <a href="diagnostico.html">Diagnóstico</a>
-        <a href="sobre.html">Sobre</a>
+        <a href="/index.html">Início</a>
+        <a href="/painel.html">Painel</a>
+        <a href="/leituras.html">Leituras</a>
+        <a href="/relatorios.html">Relatórios</a>
+        <a href="/alertas.html">Alertas</a>
+        <a href="/lcd.html">LCD</a>
+        <a href="/funcionamento.html">Funcionamento</a>
+        <a href="/componentes.html" aria-current="page">Componentes</a>
+        <a href="/simulacao.html">Simulação</a>
+        <a href="/diagnostico.html">Diagnóstico</a>
+        <a href="/sobre.html">Sobre</a>
     </nav>
 
     <section>
@@ -58,6 +58,7 @@
             <h3>Resumo técnico</h3>
             <div class="resumo-grid">
                 <p><strong>Custo estimado:</strong> R$ 927,50 na versão completa do TCC.</p>
+                <p><strong>Classificação:</strong> baixo custo relativo em comparação a sistemas comerciais e didáticos prontos.</p>
                 <p><strong>Operação:</strong> 12V bateria / 5V Arduino.</p>
                 <p><strong>Comunicação:</strong> USB serial em 9600 baud.</p>
                 <p><strong>Nível de água:</strong> D2, D3 e D4.</p>
@@ -66,6 +67,21 @@
                 <p><strong>LEDs e buzzer:</strong> D8, D9, D10 e D11.</p>
                 <p><strong>LCD:</strong> I2C com SDA e SCL.</p>
                 <p><strong>Energia:</strong> bateria com recarga solar.</p>
+            </div>
+        </div>
+
+        <div class="alerta-site">
+            <strong>Por que baixo custo relativo?</strong>
+            <p>O valor completo inclui vários recursos para fins de TCC: monitoramento elétrico, energia solar, bateria, LCD, alertas, montagem física e interface web. O projeto é considerado acessível porque usa componentes populares, permite reaproveitamento de reservatórios e pode ser simplificado conforme a necessidade da comunidade ou da escola.</p>
+        </div>
+
+        <div class="info-box">
+            <h3>Possíveis adaptações para reduzir custo</h3>
+            <div class="resumo-grid">
+                <p><strong>Versão básica:</strong> Arduino, sensores de nível, relé e bomba para controle do reservatório.</p>
+                <p><strong>Versão educativa:</strong> sensores, LEDs, LCD e simulação para uso em sala de aula.</p>
+                <p><strong>Versão solar:</strong> bateria, controlador de carga e placa solar quando houver necessidade de autonomia.</p>
+                <p><strong>Reaproveitamento:</strong> uso de galões, bombonas ou caixas plásticas reduz o custo da estrutura física.</p>
             </div>
         </div>
     </section>
