@@ -1,6 +1,6 @@
-# Sistema Mecatrônico Automatizado
+# Sistema Mecatrônico Social de Baixo Custo
 
-Painel de monitoramento em tempo real para um sistema mecatrônico de controle inteligente de água, energia solar e bateria. O projeto usa Arduino, Node.js e uma interface web responsiva.
+Painel de monitoramento em tempo real para um sistema mecatrônico social completo de baixo custo, com controle inteligente de água, energia solar e bateria. O projeto usa Arduino, Node.js e uma interface web responsiva para demonstrar aplicação em residências de baixa renda, escolas públicas, hortas comunitárias e pequenos espaços rurais.
 
 ## Recursos
 
@@ -10,6 +10,7 @@ Painel de monitoramento em tempo real para um sistema mecatrônico de controle i
 - Relatórios com médias, máximos, mínimos e contagem de alertas.
 - Exportação de leituras em CSV.
 - Tela dedicada de alertas.
+- Documentação do protótipo completo com reservatórios, alimentação solar, bateria, controlador de carga, conectores, fusível e montagem soldada.
 - Modo simulação automático quando o Arduino não está conectado ou quando o projeto roda em nuvem.
 - Página de diagnóstico do servidor e da conexão serial.
 - Validação dos dados recebidos do Arduino.
@@ -95,6 +96,19 @@ Valores esperados:
 | `cargaBateria` | número entre 0 e 100 |
 | `tensaoSolar` | número entre 0 e 40 |
 | `alerta` | texto curto, como `NORMAL`, `BATERIA BAIXA` ou `CORRENTE ALTA` |
+
+## Pinagem documentada no TCC
+
+| Função | Pinos |
+| --- | --- |
+| Sensores de nível baixo, médio e alto | `D2`, `D3`, `D4` |
+| Relé da bomba | `D7` |
+| LEDs verde, amarelo e vermelho | `D8`, `D9`, `D10` |
+| Buzzer | `D11` |
+| Sensor de corrente ACS712 | `A0` |
+| Sensor de tensão da bateria | `A1` |
+| Sensor de tensão da placa solar | `A2` |
+| Displays LCD I2C | `A4` e `A5` |
 
 ## Rotas
 

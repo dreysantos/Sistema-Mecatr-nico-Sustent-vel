@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Componentes do Sistema Mecatrônico." />
+    <meta name="description" content="Componentes do Sistema Mecatrônico Social Completo de Baixo Custo." />
     <meta name="author" content="CETEP-RM" />
     <meta name="theme-color" content="#005f56" />
     <meta name="color-scheme" content="light dark" />
@@ -14,8 +14,8 @@
 
 <body>
     <header>
-        <h1>Sistema Mecatrônico Automatizado</h1>
-        <p>Painel local de acompanhamento das leituras do sistema de controle de água, energia e alimentação solar.</p>
+        <h1>Sistema Mecatrônico Social de Baixo Custo</h1>
+        <p>Controle inteligente de água, energia e alimentação solar para residências, escolas, hortas e pequenos espaços comunitários.</p>
     </header>
 
     <nav>
@@ -34,28 +34,36 @@
 
     <section>
         <h2 class="titulo-secao">Principais componentes</h2>
-        <p class="texto">Cada componente cumpre uma função no controle de água, energia e comunicação do protótipo.</p>
+        <p class="texto">A seleção mantém a versão completa do protótipo: controle hídrico, monitoramento elétrico, alimentação solar, armazenamento em bateria e montagem física definitiva.</p>
 
         <div class="componentes">
             <div class="item"><strong>Arduino Uno</strong><p>Microcontrolador principal que coordena sensores, bomba e comunicação serial.</p></div>
-            <div class="item"><strong>Sensores de nível</strong><p>Detectam se o reservatório está baixo, médio ou cheio.</p></div>
+            <div class="item"><strong>Sensores de nível</strong><p>Detectam se o reservatório reaproveitado está baixo, médio ou cheio.</p></div>
             <div class="item"><strong>Relé 5V</strong><p>Funciona como chave eletrônica para acionamento da bomba.</p></div>
             <div class="item"><strong>Bomba 12V</strong><p>Realiza o abastecimento ou distribuição de água.</p></div>
             <div class="item"><strong>ACS712</strong><p>Sensor de corrente usado para medir consumo elétrico.</p></div>
             <div class="item"><strong>Sensores de tensão</strong><p>Medem tensão da bateria e da placa solar.</p></div>
             <div class="item"><strong>Placa solar</strong><p>Gera energia para manter a bateria carregada.</p></div>
+            <div class="item"><strong>Controlador de carga</strong><p>Gerencia a recarga da bateria 12V pela placa solar.</p></div>
             <div class="item"><strong>Bateria 12V</strong><p>Armazena energia para funcionamento sem sol direto.</p></div>
             <div class="item"><strong>Conversor Buck</strong><p>Reduz 12V para 5V quando necessário.</p></div>
-            <div class="item"><strong>LCD I2C 16x2</strong><p>Exibe leituras diretamente no protótipo.</p></div>
+            <div class="item"><strong>LCD I2C 16x2</strong><p>Exibe leituras diretamente no protótipo; na simulação podem ser usados cinco displays.</p></div>
+            <div class="item"><strong>LEDs e buzzer</strong><p>Sinalizam nível, operação normal, atenção e falhas elétricas.</p></div>
+            <div class="item"><strong>Placa perfurada e soldagem</strong><p>Permitem uma montagem mais firme que a protoboard para apresentação e testes.</p></div>
+            <div class="item"><strong>Conectores, bornes e fusível</strong><p>Facilitam manutenção e aumentam a proteção da alimentação 12V.</p></div>
+            <div class="item"><strong>Reservatórios reaproveitados</strong><p>Galões, bombonas ou caixas plásticas reduzem custo e reforçam a proposta social.</p></div>
         </div>
 
         <div class="info-box">
             <h3>Resumo técnico</h3>
             <div class="resumo-grid">
+                <p><strong>Custo estimado:</strong> R$ 927,50 na versão completa do TCC.</p>
                 <p><strong>Operação:</strong> 12V bateria / 5V Arduino.</p>
                 <p><strong>Comunicação:</strong> USB serial em 9600 baud.</p>
-                <p><strong>Nível de água:</strong> A0, A1 e A2.</p>
-                <p><strong>Controle de bomba:</strong> saída digital + relé 5V.</p>
+                <p><strong>Nível de água:</strong> D2, D3 e D4.</p>
+                <p><strong>Corrente, bateria e solar:</strong> A0, A1 e A2.</p>
+                <p><strong>Controle de bomba:</strong> D7 + relé 5V.</p>
+                <p><strong>LEDs e buzzer:</strong> D8, D9, D10 e D11.</p>
                 <p><strong>LCD:</strong> I2C com SDA e SCL.</p>
                 <p><strong>Energia:</strong> bateria com recarga solar.</p>
             </div>
@@ -63,7 +71,7 @@
     </section>
 
     <footer>
-        <p>Projeto: Sistema Mecatrônico Automatizado | CETEP-RM | Camaçari - BA | 2026</p>
+        <p>Projeto: Sistema Mecatrônico Social Completo de Baixo Custo | CETEP-RM | Camaçari - BA | 2026</p>
     </footer>
 </body>
 

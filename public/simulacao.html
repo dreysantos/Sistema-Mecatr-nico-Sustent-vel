@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Simulação do circuito eletrônico do Sistema Mecatrônico." />
+    <meta name="description" content="Simulação do circuito eletrônico do Sistema Mecatrônico Social Completo de Baixo Custo." />
     <meta name="author" content="CETEP-RM" />
     <meta name="theme-color" content="#005f56" />
     <meta name="color-scheme" content="light dark" />
@@ -14,8 +14,8 @@
 
 <body>
     <header>
-        <h1>Sistema Mecatrônico Automatizado</h1>
-        <p>Painel local de acompanhamento das leituras do sistema de controle de água, energia e alimentação solar.</p>
+        <h1>Sistema Mecatrônico Social de Baixo Custo</h1>
+        <p>Controle inteligente de água, energia e alimentação solar para residências, escolas, hortas e pequenos espaços comunitários.</p>
     </header>
 
     <nav>
@@ -34,7 +34,7 @@
 
     <section>
         <h2 class="titulo-secao">Simulação do circuito</h2>
-        <p class="texto">Esta área documenta os estados esperados do circuito e o mapa de conexões. O servidor também cria leituras simuladas automaticamente quando o Arduino não está conectado.</p>
+        <p class="texto">Esta área documenta os estados esperados do circuito completo e o mapa de conexões usado na lógica do TCC. O servidor também cria leituras simuladas automaticamente quando o Arduino não está conectado.</p>
 
         <div class="simulacao-grid">
             <div class="simulacao-card">
@@ -53,39 +53,42 @@
             <div class="simulacao-card">
                 <div class="simulacao-info">
                     <h3>Estado de atenção</h3>
-                    <p>Representa bateria baixa, corrente elevada ou reservatório em nível crítico.</p>
+                    <p>Representa bateria baixa, corrente elevada ou reservatório em nível crítico, com bomba pausada quando a alimentação precisa ser protegida.</p>
                     <ul class="lista-limpa">
                         <li>Bateria: abaixo de 25%.</li>
                         <li>Nível de água: baixo.</li>
                         <li>Corrente: acima do limite configurado.</li>
-                        <li>Alerta: BATERIA BAIXA ou CORRENTE ALTA.</li>
+                        <li>Alerta: BATERIA BAIXA, CORRENTE ALTA ou bomba pausada.</li>
                     </ul>
                 </div>
             </div>
         </div>
 
         <div class="alerta-site">
-            <strong>Modo simulação:</strong> em nuvem ou sem Arduino conectado, a rota <code>/dados</code> retorna leituras demonstrativas para manter o painel apresentável.
+            <strong>Modo simulação:</strong> no Wokwi, chaves representam os sensores de nível e potenciômetros representam corrente, bateria e tensão solar. Em nuvem ou sem Arduino conectado, a rota <code>/dados</code> retorna leituras demonstrativas para manter o painel apresentável.
         </div>
 
         <h2 class="titulo-secao">Mapa de conexões</h2>
         <div class="conexoes-grid">
-            <div class="conexao-item"><strong>Sensores de nível</strong><code>A0, A1, A2</code><p>Entradas analógicas para detectar níveis de água.</p></div>
-            <div class="conexao-item"><strong>Sensor ACS712</strong><code>A3</code><p>Entrada analógica para medir corrente elétrica.</p></div>
-            <div class="conexao-item"><strong>Tensão da bateria</strong><code>A4</code><p>Monitoramento da bateria 12V.</p></div>
-            <div class="conexao-item"><strong>Tensão solar</strong><code>A5</code><p>Monitoramento da placa solar.</p></div>
-            <div class="conexao-item"><strong>Relé da bomba</strong><code>D13</code><p>Saída digital para controle da bomba.</p></div>
+            <div class="conexao-item"><strong>Sensores de nível</strong><code>D2, D3, D4</code><p>Entradas digitais com chaves para detectar níveis de água.</p></div>
+            <div class="conexao-item"><strong>Sensor ACS712</strong><code>A0</code><p>Entrada analógica para medir corrente elétrica.</p></div>
+            <div class="conexao-item"><strong>Tensão da bateria</strong><code>A1</code><p>Monitoramento da bateria 12V.</p></div>
+            <div class="conexao-item"><strong>Tensão solar</strong><code>A2</code><p>Monitoramento da placa solar.</p></div>
+            <div class="conexao-item"><strong>Relé da bomba</strong><code>D7</code><p>Saída digital para controle da bomba.</p></div>
+            <div class="conexao-item"><strong>LEDs indicadores</strong><code>D8, D9, D10</code><p>Sinalização verde, amarela e vermelha.</p></div>
+            <div class="conexao-item"><strong>Buzzer</strong><code>D11</code><p>Alerta sonoro em falhas ou condições críticas.</p></div>
+            <div class="conexao-item"><strong>LCDs I2C</strong><code>A4, A5</code><p>Comunicação SDA/SCL para os displays 16x2.</p></div>
             <div class="conexao-item"><strong>Comunicação serial</strong><code>USB</code><p>Envio de JSON para o servidor web.</p></div>
         </div>
 
         <div class="info-box">
             <h3>Fluxo de dados</h3>
-            <p>Arduino -> JSON serial -> Servidor Node.js -> rota <code>/dados</code> -> interface web -> gráficos e alertas.</p>
+            <p>Reservatório, placa solar e bateria -> Arduino -> JSON serial -> Servidor Node.js -> rota <code>/dados</code> -> interface web -> gráficos e alertas.</p>
         </div>
     </section>
 
     <footer>
-        <p>Projeto: Sistema Mecatrônico Automatizado | CETEP-RM | Camaçari - BA | 2026</p>
+        <p>Projeto: Sistema Mecatrônico Social Completo de Baixo Custo | CETEP-RM | Camaçari - BA | 2026</p>
     </footer>
 </body>
 

@@ -590,7 +590,7 @@ function gerarDadosSimulados() {
     const tensaoSolar = limitarNumero(15 + Math.sin(segundos / 6) * 4, 0, 22);
     const corrente = limitarNumero(1.8 + Math.abs(Math.sin(segundos / 4)) * 2.4, 0, 8);
     const nivel = bateria < 25 ? "BAIXO" : ciclo > 0.35 ? "CHEIO" : "MEDIO";
-    const bomba = nivel === "BAIXO" && bateria > 25 ? "LIGADA" : "DESLIGADA";
+    const bomba = bateria < 20 ? "PAUSADA" : nivel === "BAIXO" ? "LIGADA" : "DESLIGADA";
     const alerta = bateria < 20 ? "BATERIA BAIXA" : corrente > 4 ? "CORRENTE ALTA" : "NORMAL";
 
     return {

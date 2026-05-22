@@ -1,7 +1,7 @@
 {
-    "name": "sistema-mecatronico-sustentavel",
+    "name": "sistema-mecatronico-social-baixo-custo",
     "version": "1.0.0",
-    "description": "Painel de monitoramento em tempo real para sistema mecatrônico com Arduino, controle de água, energia solar e bateria.",
+    "description": "Painel de monitoramento em tempo real para sistema mecatrônico social de baixo custo com Arduino, controle de água, energia solar e bateria.",
     "main": "server.js",
     "scripts": {
         "start": "node server.js",
@@ -12,6 +12,8 @@
         "automação",
         "energia solar",
         "monitoramento",
+        "baixa renda",
+        "controle de água",
         "IoT"
     ],
     "author": "CETEP-RM",

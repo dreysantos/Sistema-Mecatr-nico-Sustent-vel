@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Como funciona o Sistema Mecatrônico." />
+    <meta name="description" content="Como funciona o Sistema Mecatrônico Social Completo de Baixo Custo." />
     <meta name="author" content="CETEP-RM" />
     <meta name="theme-color" content="#005f56" />
     <meta name="color-scheme" content="light dark" />
@@ -14,8 +14,8 @@
 
 <body>
     <header>
-        <h1>Sistema Mecatrônico Automatizado</h1>
-        <p>Painel local de acompanhamento das leituras do sistema de controle de água, energia e alimentação solar.</p>
+        <h1>Sistema Mecatrônico Social de Baixo Custo</h1>
+        <p>Controle inteligente de água, energia e alimentação solar para residências, escolas, hortas e pequenos espaços comunitários.</p>
     </header>
 
     <nav>
@@ -34,44 +34,45 @@
 
     <section>
         <h2 class="titulo-secao">Como o sistema funciona</h2>
-        <p class="texto">O Arduino processa sensores de água, corrente, bateria e placa solar. Com essas leituras, ele controla a bomba e envia os dados para o servidor web.</p>
+        <p class="texto">O Arduino processa sensores de nível, corrente, bateria e placa solar. Com essas leituras, ele controla a bomba, protege a alimentação do protótipo e envia os dados para o servidor web.</p>
 
         <div class="grid-explicacao">
             <div class="etapa">
                 <h3>1. Leitura dos sensores</h3>
-                <p>Os sensores identificam nível de água, corrente consumida, tensão da bateria e tensão da placa solar.</p>
+                <p>Os sensores identificam nível baixo, médio ou cheio, corrente consumida, tensão da bateria e tensão da placa solar.</p>
             </div>
             <div class="etapa">
                 <h3>2. Processamento no Arduino</h3>
-                <p>O Arduino interpreta os sinais e decide se a bomba deve ligar, desligar ou permanecer pausada.</p>
+                <p>O Arduino interpreta os sinais e decide se a bomba deve ligar, desligar ou permanecer pausada para proteger a bateria.</p>
             </div>
             <div class="etapa">
                 <h3>3. Controle da bomba</h3>
-                <p>O relé funciona como chave eletrônica para acionar a bomba de água com segurança.</p>
+                <p>O relé recebe o comando do Arduino, enquanto a bateria fornece a alimentação de 12V para a bomba.</p>
             </div>
             <div class="etapa">
                 <h3>4. Monitoramento energético</h3>
-                <p>O sistema acompanha bateria, placa solar e consumo para evitar falhas de energia.</p>
+                <p>O sistema acompanha bateria, placa solar e consumo para indicar autonomia, recarga e possíveis falhas elétricas.</p>
             </div>
             <div class="etapa">
-                <h3>5. Exibição no site</h3>
+                <h3>5. Sinalização local</h3>
+                <p>Displays LCD, LEDs e buzzer exibem nível de água, bomba, corrente, bateria, solar e alertas.</p>
+            </div>
+            <div class="etapa">
+                <h3>6. Exibição no site</h3>
                 <p>As informações chegam ao servidor Node.js por USB serial e são exibidas em tempo real no navegador.</p>
-            </div>
-            <div class="etapa">
-                <h3>6. Alertas visuais</h3>
-                <p>Condições como bateria baixa ou corrente alta aparecem com destaque no painel.</p>
             </div>
         </div>
 
         <div class="info-box">
             <h3>Fluxo de dados</h3>
-            <p><strong>Sensores</strong> -> <strong>Arduino</strong> -> <strong>Lógica de controle</strong> -> <strong>Relé/Bomba</strong></p>
+            <p><strong>Reservatório</strong> -> <strong>Sensores</strong> -> <strong>Arduino</strong> -> <strong>Lógica de controle</strong> -> <strong>Relé/Bomba</strong></p>
+            <p><strong>Placa solar</strong> -> <strong>Controlador de carga</strong> -> <strong>Bateria 12V</strong> -> <strong>Conversor buck 5V</strong></p>
             <p><strong>JSON serial</strong> -> <strong>Servidor Node.js</strong> -> <strong>Navegador</strong> -> <strong>Painel em tempo real</strong></p>
         </div>
     </section>
 
     <footer>
-        <p>Projeto: Sistema Mecatrônico Automatizado | CETEP-RM | Camaçari - BA | 2026</p>
+        <p>Projeto: Sistema Mecatrônico Social Completo de Baixo Custo | CETEP-RM | Camaçari - BA | 2026</p>
     </footer>
 </body>
 

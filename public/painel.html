@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Painel de monitoramento em tempo real do Sistema Mecatrônico." />
+    <meta name="description" content="Painel de monitoramento em tempo real do Sistema Mecatrônico Social Completo de Baixo Custo." />
     <meta name="author" content="CETEP-RM" />
     <meta name="theme-color" content="#005f56" />
     <meta name="color-scheme" content="light dark" />
@@ -14,8 +14,8 @@
 
 <body>
     <header>
-        <h1>Sistema Mecatrônico Automatizado</h1>
-        <p>Painel local de acompanhamento das leituras do sistema de controle de água, energia e alimentação solar.</p>
+        <h1>Sistema Mecatrônico Social de Baixo Custo</h1>
+        <p>Controle inteligente de água, energia e alimentação solar para residências, escolas, hortas e pequenos espaços comunitários.</p>
     </header>
 
     <nav>
@@ -34,7 +34,7 @@
 
     <section>
         <h2 class="titulo-secao">Painel de Monitoramento</h2>
-        <p class="texto">Esta página mostra as informações recebidas do Arduino via servidor Node.js. Se o Arduino estiver indisponível, o modo simulação mantém dados demonstrativos ativos.</p>
+        <p class="texto">Esta página mostra as informações recebidas do Arduino via servidor Node.js, incluindo reservatório, bomba, corrente, bateria e placa solar. Se o Arduino estiver indisponível, o modo simulação mantém dados demonstrativos ativos.</p>
 
         <div class="status-conexao" id="statusConexao">
             <span class="ponto-conexao" id="pontoConexao"></span>
@@ -83,20 +83,20 @@
                 <h3>Bateria</h3>
                 <p class="valor status-normal" id="bateria">0.0V - 0%</p>
                 <div class="barra-medidor" id="barraBateria"><span></span></div>
-                <p>Mostra tensão e carga estimada da bateria.</p>
+                <p>Mostra tensão e carga estimada da bateria recarregável 12V.</p>
             </div>
 
             <div class="card">
                 <h3>Placa solar</h3>
                 <p class="valor" id="solar">0.0 V</p>
                 <div class="barra-medidor" id="barraSolar"><span></span></div>
-                <p>Mostra a tensão recebida da placa solar.</p>
+                <p>Mostra a tensão recebida da placa solar para recarga da bateria.</p>
             </div>
 
             <div class="card">
                 <h3>Alerta</h3>
                 <p class="valor status-normal" id="alerta">AGUARDANDO</p>
-                <p>Indica bateria baixa, corrente alta ou operação normal.</p>
+                <p>Indica bateria baixa, corrente alta, bomba pausada ou operação normal.</p>
             </div>
 
             <div class="card grafico-card">
@@ -108,7 +108,7 @@
     </section>
 
     <footer>
-        <p>Projeto: Sistema Mecatrônico Automatizado | CETEP-RM | Camaçari - BA | 2026</p>
+        <p>Projeto: Sistema Mecatrônico Social Completo de Baixo Custo | CETEP-RM | Camaçari - BA | 2026</p>
     </footer>
 
     <script src="js/script.js"></script>
