@@ -378,11 +378,11 @@ function renderizarTokenAcesso(dados) {
 
         const linkAtual = dados.links?.leituras || `${window.location.origin}${window.location.pathname}?token=${encodeURIComponent(dados.token)}`;
         box.innerHTML = `
-            <strong>Token da leitura</strong>
+            <strong>Código da leitura</strong>
             <code>${escaparHTML(dados.token)}</code>
-            <button class="botao-primario botao-consulta botao-secundario copiar-token" type="button" data-token="${escaparHTML(dados.token)}">Copiar token</button>
-            <a class="botao-primario botao-consulta botao-secundario" href="${escaparHTML(linkAtual)}">Abrir com token</a>
-            <p>Gerado pelo horário da leitura. Ele muda quando chega uma nova leitura.</p>
+            <button class="botao-primario botao-consulta botao-secundario copiar-token" type="button" data-token="${escaparHTML(dados.token)}">Copiar código</button>
+            <a class="botao-primario botao-consulta botao-secundario" href="${escaparHTML(linkAtual)}">Abrir com código</a>
+            <p>Código gerado pelo horário da leitura. Ele muda quando chega uma nova leitura.</p>
         `;
     });
 
@@ -392,7 +392,7 @@ function renderizarTokenAcesso(dados) {
                 await navigator.clipboard.writeText(botao.dataset.token || dados.token);
                 botao.innerText = "Copiado";
                 setTimeout(() => {
-                    botao.innerText = "Copiar token";
+                    botao.innerText = "Copiar código";
                 }, 1800);
             } catch (erro) {
                 botao.innerText = "Copie manualmente";
@@ -500,7 +500,7 @@ async function aplicarModoOperacao() {
         status.innerText = `Modo atual: ${nomeModo(resposta.modo)}`;
         buscarDadosArduino();
     } catch (erro) {
-        status.innerText = `Não foi possível alterar. Use o token da leitura exibido na tela. (${erro.message})`;
+        status.innerText = `Não foi possível alterar. Use o código da leitura exibido na tela. (${erro.message})`;
     }
 }
 
@@ -592,7 +592,7 @@ function renderizarCardsLeituras(leituras) {
             <p>Bateria: ${Number(leitura.tensaoBateria || 0).toFixed(1)}V / ${Math.round(Number(leitura.cargaBateria || 0))}%</p>
             <p>Solar: ${Number(leitura.tensaoSolar || 0).toFixed(1)}V | Corrente: ${Number(leitura.corrente || 0).toFixed(2)}A</p>
             <p>Alerta: ${escaparHTML(leitura.alerta || "-")}</p>
-            ${leitura.tokenAcesso ? `<p>Token: <code>${escaparHTML(leitura.tokenAcesso)}</code></p>` : ""}
+            ${leitura.tokenAcesso ? `<p>Código da leitura: <code>${escaparHTML(leitura.tokenAcesso)}</code></p>` : ""}
         </div>
     `).join("");
 }
@@ -622,7 +622,7 @@ async function carregarLeituras() {
         atualizarResumoLeituras(Array.isArray(leituras) ? leituras : []);
         atualizarStatusLeituras("ok", "Leituras carregadas com sucesso.");
     } catch (erro) {
-        tabela.innerHTML = `<tr><td colspan="8">Não foi possível carregar. Copie o token da leitura exibido acima e tente novamente.</td></tr>`;
+        tabela.innerHTML = `<tr><td colspan="8">Não foi possível carregar. Copie o código da leitura exibido acima e tente novamente.</td></tr>`;
         atualizarResumoLeituras([]);
         atualizarStatusLeituras("erro", `Erro ao consultar o banco: ${erro.message}`);
     }

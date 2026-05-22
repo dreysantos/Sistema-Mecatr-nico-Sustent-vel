@@ -36,6 +36,11 @@
         <h2 class="titulo-secao">Diagnóstico do sistema</h2>
         <p class="texto">Acompanhe o estado do servidor, conexão com Arduino, modo cloud, simulação automática e histórico de leituras do protótipo completo.</p>
 
+        <div class="info-box">
+            <h3>Consulta técnica do sistema</h3>
+            <p>Esta área permite pesquisar informações específicas do protótipo, como leituras registradas, status dos sensores, funcionamento da bomba, tensão da bateria, tensão recebida da placa solar e alertas emitidos pelo sistema. O objetivo é facilitar a análise do funcionamento durante os testes e permitir uma visualização mais detalhada dos dados coletados.</p>
+        </div>
+
         <div class="modo-box">
             <label>
                 Modo do painel
@@ -46,8 +51,8 @@
                 </select>
             </label>
             <label>
-                Token
-                <input id="tokenModo" type="text" autocomplete="off" placeholder="Token gerado pela leitura atual" />
+                Código de consulta
+                <input id="tokenModo" type="text" autocomplete="off" placeholder="Código gerado pela leitura atual" />
             </label>
             <button class="botao-primario botao-consulta" id="aplicarModo" type="button">Aplicar modo</button>
             <p id="statusModo">Modo atual: carregando...</p>

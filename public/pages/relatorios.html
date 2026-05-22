@@ -36,6 +36,11 @@
         <h2 class="titulo-secao">Relatórios</h2>
         <p class="texto">Resumo automático com médias, máximos, mínimos, uso da bomba e quantidade de alertas do período selecionado.</p>
 
+        <div class="info-box">
+            <h3>Detalhamento da leitura</h3>
+            <p>Use o código de consulta para analisar registros de um período e verificar como o protótipo se comportou em relação ao nível da água, funcionamento da bomba, bateria, placa solar, corrente e alertas.</p>
+        </div>
+
         <div class="consulta-box">
             <label>
                 Período
@@ -47,8 +52,8 @@
                 </select>
             </label>
             <label>
-                Token
-                <input id="tokenRelatorio" type="text" autocomplete="off" placeholder="Token gerado pela leitura atual" />
+                Código de consulta
+                <input id="tokenRelatorio" type="text" autocomplete="off" placeholder="Código gerado pela leitura atual" />
             </label>
             <button class="botao-primario botao-consulta" id="atualizarRelatorio" type="button">Atualizar</button>
         </div>
