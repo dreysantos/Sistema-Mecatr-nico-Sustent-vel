@@ -97,6 +97,8 @@ Valores esperados:
 | `tensaoSolar` | número entre 0 e 40 |
 | `alerta` | texto curto, como `NORMAL`, `BATERIA BAIXA` ou `CORRENTE ALTA` |
 
+O servidor também gera automaticamente um `tokenAcesso` com base no horário da leitura atual. Esse token muda quando uma nova leitura chega e aparece nas telas de consulta para copiar ou abrir links diretos.
+
 ## Pinagem documentada no TCC
 
 | Função | Pinos |
@@ -116,13 +118,14 @@ Valores esperados:
 - `GET /modo`: mostra o modo atual do painel.
 - `POST /modo`: altera entre `automatico`, `simulacao` e `arduino`.
 - `GET /historico`: últimas leituras armazenadas.
-- `GET /leituras`: últimas leituras salvas no banco local. Aceita `?limite=100` e respeita `DIAGNOSTICO_TOKEN` quando configurado.
+- `GET /token-acesso`: token gerado pelo horário da leitura atual e links diretos com `?token=`.
+- `GET /leituras`: últimas leituras salvas no banco local. Aceita `?limite=100` e exige o token atual em `?token=`.
 - `GET /relatorio`: indicadores consolidados das leituras. Aceita `?periodo=hoje`, `?periodo=24h` ou `?periodo=7d`.
 - `GET /alertas`: leituras consideradas críticas ou de atenção.
 - `GET /exportar.csv`: exporta leituras em CSV.
 - `GET /rede`: mostra o IP local e links para acessar o painel e as leituras em outro dispositivo.
 - `GET /saude`: status simples do servidor.
-- `GET /diagnostico`: status detalhado do servidor, Arduino, memória e histórico.
+- `GET /diagnostico`: status detalhado do servidor, Arduino, memória e histórico. Exige token em `?token=`.
 
 ## Banco de dados local
 
@@ -239,13 +242,21 @@ Para restringir CORS em produção, informe uma lista separada por vírgula:
 CORS_ORIGEM=https://seu-site.com,https://outro-dominio.com
 ```
 
-Para proteger a rota `/diagnostico`, configure um token:
+As telas de leituras, relatórios, alertas e diagnóstico exibem automaticamente um token gerado pelo horário da leitura atual. Para abrir uma rota protegida diretamente, copie o token exibido na tela ou use o link pronto com `?token=`.
+
+Exemplo:
+
+```text
+/diagnostico.html?token=TCC-220526-092346
+```
+
+Opcionalmente, ainda é possível configurar um token fixo:
 
 ```env
 DIAGNOSTICO_TOKEN=troque-este-token
 ```
 
-Com token ativo, acesse a página visual assim:
+Com token fixo ativo, acesse a página visual assim:
 
 ```text
 /diagnostico.html?token=troque-este-token

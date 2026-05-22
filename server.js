@@ -144,6 +144,7 @@ app.use(express.static(path.join(__dirname, "public"), {
 }));
 
 function criarDadosBase(conexao) {
+    const agora = new Date();
     return {
         nivel: "AGUARDANDO",
         bomba: "AGUARDANDO",
@@ -154,8 +155,27 @@ function criarDadosBase(conexao) {
         alerta: "AGUARDANDO",
         conexao,
         simulado: false,
-        ultimaAtualizacao: new Date().toLocaleTimeString("pt-BR")
+        ultimaAtualizacao: agora.toLocaleTimeString("pt-BR"),
+        tokenAcesso: gerarTokenAcesso(agora)
     };
+}
+
+function gerarTokenAcesso(data = new Date()) {
+    const partes = new Intl.DateTimeFormat("pt-BR", {
+        timeZone: "America/Bahia",
+        year: "2-digit",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false
+    }).formatToParts(data).reduce((acc, parte) => {
+        acc[parte.type] = parte.value;
+        return acc;
+    }, {});
+
+    return `TCC-${partes.day}${partes.month}${partes.year}-${partes.hour}${partes.minute}${partes.second}`;
 }
 
 function obterIpLocal() {
@@ -214,7 +234,8 @@ function criarRegistroLeitura(dados) {
         tensaoSolar: dados.tensaoSolar,
         alerta: dados.alerta,
         conexao: dados.conexao,
-        simulado: Boolean(dados.simulado)
+        simulado: Boolean(dados.simulado),
+        tokenAcesso: dados.tokenAcesso || ""
     };
 }
 
@@ -557,6 +578,8 @@ function validarDadosArduino(dados) {
     const tensaoSolar = limitarNumero(dados.tensaoSolar, 0, 40);
     const alertaPadrao = tensaoBateria > 0 && tensaoBateria < 11.5 ? "BATERIA BAIXA" : "NORMAL";
 
+    const agora = new Date();
+
     return {
         nivel: normalizarTexto(dados.nivel, ["BAIXO", "MEDIO", "CHEIO", "INDEFINIDO"], "INDEFINIDO"),
         bomba: normalizarTexto(dados.bomba, ["LIGADA", "DESLIGADA", "PAUSADA", "INDEFINIDO"], "INDEFINIDO"),
@@ -567,7 +590,8 @@ function validarDadosArduino(dados) {
         alerta: String(dados.alerta || alertaPadrao).trim().toUpperCase().substring(0, 80),
         conexao: "online",
         simulado: false,
-        ultimaAtualizacao: new Date().toLocaleTimeString("pt-BR")
+        ultimaAtualizacao: agora.toLocaleTimeString("pt-BR"),
+        tokenAcesso: gerarTokenAcesso(agora)
     };
 }
 
@@ -583,6 +607,7 @@ function adicionarHistorico(dados) {
 }
 
 function gerarDadosSimulados() {
+    const agora = new Date();
     const segundos = Date.now() / 1000;
     const ciclo = Math.sin(segundos / 9);
     const bateria = limitarNumero(76 + ciclo * 18, 8, 100);
@@ -603,7 +628,8 @@ function gerarDadosSimulados() {
         alerta,
         conexao: MODO_CLOUD ? "cloud" : "simulado",
         simulado: true,
-        ultimaAtualizacao: new Date().toLocaleTimeString("pt-BR")
+        ultimaAtualizacao: agora.toLocaleTimeString("pt-BR"),
+        tokenAcesso: gerarTokenAcesso(agora)
     };
 }
 
@@ -615,6 +641,7 @@ function obterDadosAtuais() {
     if (deveSimular) {
         const simulado = gerarDadosSimulados();
         simulado.modoOperacao = modoOperacao;
+        dadosArduino = simulado;
         adicionarHistorico(simulado);
         return simulado;
     }
@@ -719,6 +746,24 @@ app.get("/modo", (req, res) => {
         opcoes: ["automatico", "simulacao", "arduino"],
         modoCloud: MODO_CLOUD,
         arduino: dadosArduino.conexao
+    });
+});
+
+app.get("/token-acesso", (req, res) => {
+    const token = obterDadosAtuais().tokenAcesso || gerarTokenAcesso();
+    const base = obterUrlPublica(req) || `${req.protocol}://${req.headers.host}`;
+
+    res.setHeader("Cache-Control", "no-store");
+    res.json({
+        token,
+        geradoEm: dadosArduino.ultimaAtualizacao,
+        mudaACadaLeitura: true,
+        links: {
+            leituras: `${base}/leituras.html?token=${encodeURIComponent(token)}`,
+            relatorios: `${base}/relatorios.html?token=${encodeURIComponent(token)}`,
+            alertas: `${base}/alertas.html?token=${encodeURIComponent(token)}`,
+            diagnostico: `${base}/diagnostico.html?token=${encodeURIComponent(token)}`
+        }
     });
 });
 
@@ -846,11 +891,15 @@ app.get("/rede", (req, res) => {
 });
 
 function diagnosticoAutorizado(req) {
-    if (!DIAGNOSTICO_TOKEN) {
+    const tokenInformado = String(req.headers["x-diagnostico-token"] || req.query.token || "").trim();
+    const tokenAtual = String(dadosArduino.tokenAcesso || "").trim();
+    const tokenRecente = historico.some((leitura) => String(leitura.tokenAcesso || "").trim() === tokenInformado);
+
+    if (tokenInformado && ((tokenAtual && tokenInformado === tokenAtual) || tokenRecente)) {
         return true;
     }
 
-    return req.headers["x-diagnostico-token"] === DIAGNOSTICO_TOKEN || req.query.token === DIAGNOSTICO_TOKEN;
+    return Boolean(DIAGNOSTICO_TOKEN && tokenInformado === DIAGNOSTICO_TOKEN);
 }
 
 app.get("/diagnostico", async (req, res) => {

@@ -1,6 +1,7 @@
 let ultimoErro = null;
 let tentativasConexao = 0;
 let historicoLocal = [];
+let tokenAcessoCache = null;
 
 const ids = {
     pontoConexao: "pontoConexao",
@@ -244,6 +245,24 @@ function atualizarPainel(dados) {
     atualizarStatusConexao(true, dados.conexao, dados.simulado);
     ultimoErro = null;
 
+    if (dados.tokenAcesso) {
+        tokenAcessoCache = {
+            token: dados.tokenAcesso,
+            geradoEm: dados.ultimaAtualizacao,
+            mudaACadaLeitura: true,
+            links: {
+                leituras: `${window.location.origin}/leituras.html?token=${encodeURIComponent(dados.tokenAcesso)}`,
+                relatorios: `${window.location.origin}/relatorios.html?token=${encodeURIComponent(dados.tokenAcesso)}`,
+                alertas: `${window.location.origin}/alertas.html?token=${encodeURIComponent(dados.tokenAcesso)}`,
+                diagnostico: `${window.location.origin}/diagnostico.html?token=${encodeURIComponent(dados.tokenAcesso)}`
+            }
+        };
+        camposToken().forEach((campo) => {
+            campo.value = dados.tokenAcesso;
+        });
+        renderizarTokenAcesso(tokenAcessoCache);
+    }
+
     const nivel = dados.nivel || "INDEFINIDO";
     const bomba = dados.bomba || "INDEFINIDO";
     const corrente = Number(dados.corrente) || 0;
@@ -335,8 +354,82 @@ function classeAlerta(alerta) {
     return alerta ? "erro" : "aviso";
 }
 
-function tokenAtual(idCampo) {
+function tokenAtualLocal(idCampo) {
     return elemento(idCampo)?.value || new URLSearchParams(window.location.search).get("token") || "";
+}
+
+function camposToken() {
+    return ["tokenModo", "tokenLeituras", "tokenRelatorio", "tokenAlertas"].map(elemento).filter(Boolean);
+}
+
+function renderizarTokenAcesso(dados) {
+    const consultas = document.querySelectorAll(".consulta-box, .modo-box");
+    if (!consultas.length || !dados?.token) {
+        return;
+    }
+
+    consultas.forEach((consulta) => {
+        let box = consulta.querySelector(".token-acesso-box");
+        if (!box) {
+            box = document.createElement("div");
+            box.className = "token-acesso-box";
+            consulta.appendChild(box);
+        }
+
+        const linkAtual = dados.links?.leituras || `${window.location.origin}${window.location.pathname}?token=${encodeURIComponent(dados.token)}`;
+        box.innerHTML = `
+            <strong>Token da leitura</strong>
+            <code>${escaparHTML(dados.token)}</code>
+            <button class="botao-primario botao-consulta botao-secundario copiar-token" type="button" data-token="${escaparHTML(dados.token)}">Copiar token</button>
+            <a class="botao-primario botao-consulta botao-secundario" href="${escaparHTML(linkAtual)}">Abrir com token</a>
+            <p>Gerado pelo horário da leitura. Ele muda quando chega uma nova leitura.</p>
+        `;
+    });
+
+    document.querySelectorAll(".copiar-token").forEach((botao) => {
+        botao.addEventListener("click", async () => {
+            try {
+                await navigator.clipboard.writeText(botao.dataset.token || dados.token);
+                botao.innerText = "Copiado";
+                setTimeout(() => {
+                    botao.innerText = "Copiar token";
+                }, 1800);
+            } catch (erro) {
+                botao.innerText = "Copie manualmente";
+            }
+        });
+    });
+}
+
+async function carregarTokenAcesso(forcar = false) {
+    const tokenUrl = new URLSearchParams(window.location.search).get("token");
+    if (!forcar && tokenAcessoCache?.token) {
+        return tokenAcessoCache;
+    }
+
+    try {
+        const dados = await buscarJSON("/token-acesso");
+        tokenAcessoCache = dados;
+        camposToken().forEach((campo) => {
+            if (!campo.value || campo.value === tokenUrl) {
+                campo.value = dados.token;
+            }
+        });
+        renderizarTokenAcesso(dados);
+        return dados;
+    } catch (erro) {
+        return tokenUrl ? { token: tokenUrl } : { token: "" };
+    }
+}
+
+async function tokenAtual(idCampo) {
+    const preenchido = tokenAtualLocal(idCampo);
+    if (preenchido) {
+        return preenchido;
+    }
+
+    const dados = await carregarTokenAcesso();
+    return dados.token || "";
 }
 
 function montarQuery(params) {
@@ -397,7 +490,7 @@ async function aplicarModoOperacao() {
         return;
     }
 
-    const token = tokenAtual("tokenModo");
+    const token = await tokenAtual("tokenModo");
     status.innerText = "Aplicando modo...";
 
     try {
@@ -407,7 +500,7 @@ async function aplicarModoOperacao() {
         status.innerText = `Modo atual: ${nomeModo(resposta.modo)}`;
         buscarDadosArduino();
     } catch (erro) {
-        status.innerText = `Não foi possível alterar. Se configurou DIAGNOSTICO_TOKEN, informe o token. (${erro.message})`;
+        status.innerText = `Não foi possível alterar. Use o token da leitura exibido na tela. (${erro.message})`;
     }
 }
 
@@ -462,6 +555,7 @@ function renderizarTabelaLeituras(leituras) {
     tabela.innerHTML = leituras.slice().reverse().map((leitura) => {
         const alerta = leitura.alerta || "-";
         const origem = leitura.simulado ? "Simulada" : "Arduino";
+        const token = leitura.tokenAcesso || "";
 
         return `
             <tr>
@@ -472,7 +566,7 @@ function renderizarTabelaLeituras(leituras) {
                 <td>${Number(leitura.tensaoSolar || 0).toFixed(1)}V</td>
                 <td>${Number(leitura.corrente || 0).toFixed(2)}A</td>
                 <td><span class="selo ${classeAlerta(alerta)}">${escaparHTML(alerta)}</span></td>
-                <td><span class="selo ${leitura.simulado ? "aviso" : "ok"}">${origem}</span></td>
+                <td><span class="selo ${leitura.simulado ? "aviso" : "ok"}">${origem}</span>${token ? `<br><code>${escaparHTML(token)}</code>` : ""}</td>
             </tr>
         `;
     }).join("");
@@ -498,6 +592,7 @@ function renderizarCardsLeituras(leituras) {
             <p>Bateria: ${Number(leitura.tensaoBateria || 0).toFixed(1)}V / ${Math.round(Number(leitura.cargaBateria || 0))}%</p>
             <p>Solar: ${Number(leitura.tensaoSolar || 0).toFixed(1)}V | Corrente: ${Number(leitura.corrente || 0).toFixed(2)}A</p>
             <p>Alerta: ${escaparHTML(leitura.alerta || "-")}</p>
+            ${leitura.tokenAcesso ? `<p>Token: <code>${escaparHTML(leitura.tokenAcesso)}</code></p>` : ""}
         </div>
     `).join("");
 }
@@ -512,7 +607,7 @@ async function carregarLeituras() {
     const periodo = elemento("periodoLeituras")?.value || "";
     const tokenCampo = elemento("tokenLeituras");
     const tokenUrl = new URLSearchParams(window.location.search).get("token");
-    const token = tokenCampo?.value || tokenUrl || "";
+    const token = await tokenAtual("tokenLeituras");
     const url = `/leituras?${montarQuery({ limite, periodo, token })}`;
 
     if (tokenCampo && tokenUrl && !tokenCampo.value) {
@@ -527,16 +622,16 @@ async function carregarLeituras() {
         atualizarResumoLeituras(Array.isArray(leituras) ? leituras : []);
         atualizarStatusLeituras("ok", "Leituras carregadas com sucesso.");
     } catch (erro) {
-        tabela.innerHTML = `<tr><td colspan="8">Não foi possível carregar. Se configurou DIAGNOSTICO_TOKEN, informe o token acima.</td></tr>`;
+        tabela.innerHTML = `<tr><td colspan="8">Não foi possível carregar. Copie o token da leitura exibido acima e tente novamente.</td></tr>`;
         atualizarResumoLeituras([]);
         atualizarStatusLeituras("erro", `Erro ao consultar o banco: ${erro.message}`);
     }
 }
 
-function exportarLeituras() {
+async function exportarLeituras() {
     const limite = elemento("limiteLeituras")?.value || "250";
     const periodo = elemento("periodoLeituras")?.value || "";
-    const token = tokenAtual("tokenLeituras");
+    const token = await tokenAtual("tokenLeituras");
     window.location.href = `/exportar.csv?${montarQuery({ limite, periodo, token })}`;
 }
 
@@ -547,7 +642,7 @@ async function carregarRelatorio() {
     }
 
     const periodo = elemento("periodoRelatorio")?.value || "";
-    const token = tokenAtual("tokenRelatorio");
+    const token = await tokenAtual("tokenRelatorio");
 
     try {
         const relatorio = await buscarJSON(`/relatorio?${montarQuery({ periodo, token })}`);
@@ -575,7 +670,7 @@ async function carregarAlertas() {
     }
 
     const periodo = elemento("periodoAlertas")?.value || "";
-    const token = tokenAtual("tokenAlertas");
+    const token = await tokenAtual("tokenAlertas");
 
     try {
         const alertas = await buscarJSON(`/alertas?${montarQuery({ periodo, token })}`);
@@ -604,9 +699,10 @@ async function carregarDashboardHome() {
     }
 
     try {
+        const token = await tokenAtual("tokenModo");
         const [dados, relatorio, saude] = await Promise.all([
             buscarJSON("/dados"),
-            buscarJSON("/relatorio"),
+            buscarJSON(`/relatorio?${montarQuery({ token })}`),
             buscarJSON("/saude")
         ]);
 
@@ -650,7 +746,7 @@ async function carregarDiagnostico() {
     }
 
     try {
-        const token = new URLSearchParams(window.location.search).get("token");
+        const token = await tokenAtual("tokenModo");
         const url = token ? `/diagnostico?token=${encodeURIComponent(token)}` : "/diagnostico";
         const dados = await buscarJSON(url);
         container.innerHTML = "";

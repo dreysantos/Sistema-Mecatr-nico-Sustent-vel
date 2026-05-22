@@ -465,6 +465,32 @@ section h4 {
     padding: 0 11px;
 }
 
+.token-acesso-box {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+}
+
+.token-acesso-box strong {
+    color: var(--brand);
+}
+
+.token-acesso-box code {
+    font-size: 13px;
+    word-break: break-word;
+}
+
+.token-acesso-box p {
+    flex-basis: 100%;
+    margin: 0;
+    color: var(--muted);
+    font-size: 13px;
+}
+
 .tabela-box {
     margin-top: 22px;
 }
