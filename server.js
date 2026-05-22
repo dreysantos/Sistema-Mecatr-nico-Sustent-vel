@@ -35,6 +35,7 @@ let reconexaoAgendada = false;
 let portaSerial = null;
 let filaBanco = Promise.resolve();
 let modoOperacao = ["automatico", "simulacao", "arduino"].includes(MODO_OPERACAO_INICIAL) ? MODO_OPERACAO_INICIAL : "automatico";
+let codigosConsultaRecentes = [];
 
 let dadosArduino = criarDadosBase(MODO_CLOUD ? "cloud" : "offline");
 let historico = [];
@@ -192,6 +193,15 @@ function gerarTokenAcesso(data = new Date()) {
     }, {});
 
     return `TCC-${partes.day}${partes.month}${partes.year}-${partes.hour}${partes.minute}${partes.second}`;
+}
+
+function registrarCodigoConsulta(token) {
+    const codigo = String(token || "").trim();
+    if (!codigo) {
+        return;
+    }
+
+    codigosConsultaRecentes = [codigo, ...codigosConsultaRecentes.filter((item) => item !== codigo)].slice(0, 20);
 }
 
 function obterIpLocal() {
@@ -655,20 +665,24 @@ function obterDadosAtuais() {
         (modoOperacao === "automatico" && SIMULACAO_AUTOMATICA && (MODO_CLOUD || dadosArduino.conexao !== "online" || semLeituraReal));
 
     if (modoOperacao === "arduino" && (dadosArduino.simulado || dadosArduino.conexao !== "online" || semLeituraReal)) {
-        return {
+        const aguardando = {
             ...criarDadosBase(MODO_CLOUD ? "cloud" : dadosArduino.conexao === "online" ? "online" : "offline"),
             modoOperacao
         };
+        registrarCodigoConsulta(aguardando.tokenAcesso);
+        return aguardando;
     }
 
     if (deveSimular) {
         const simulado = gerarDadosSimulados();
         simulado.modoOperacao = modoOperacao;
         dadosArduino = simulado;
+        registrarCodigoConsulta(simulado.tokenAcesso);
         adicionarHistorico(simulado);
         return simulado;
     }
 
+    registrarCodigoConsulta(dadosArduino.tokenAcesso);
     return {
         ...dadosArduino,
         modoOperacao
@@ -775,6 +789,7 @@ app.get("/modo", (req, res) => {
 app.get("/token-acesso", (req, res) => {
     const token = obterDadosAtuais().tokenAcesso || gerarTokenAcesso();
     const base = obterUrlPublica(req) || `${req.protocol}://${req.headers.host}`;
+    registrarCodigoConsulta(token);
 
     res.setHeader("Cache-Control", "no-store");
     res.json({
@@ -922,8 +937,9 @@ function diagnosticoAutorizado(req) {
     const tokenInformado = String(req.headers["x-diagnostico-token"] || req.query.token || "").trim();
     const tokenAtual = String(dadosArduino.tokenAcesso || "").trim();
     const tokenRecente = historico.some((leitura) => String(leitura.tokenAcesso || "").trim() === tokenInformado);
+    const codigoRecente = codigosConsultaRecentes.includes(tokenInformado);
 
-    if (tokenInformado && ((tokenAtual && tokenInformado === tokenAtual) || tokenRecente)) {
+    if (tokenInformado && ((tokenAtual && tokenInformado === tokenAtual) || tokenRecente || codigoRecente)) {
         return true;
     }
 
