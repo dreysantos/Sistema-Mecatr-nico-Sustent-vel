@@ -88,8 +88,15 @@ function atualizarStatusConexao(online = false, conexaoArduino = "offline", simu
         return;
     }
 
+    if (online && !simulado && (conexaoArduino === "offline" || conexaoArduino === "cloud")) {
+        ponto.className = "ponto-conexao offline";
+        label.innerText = "Arduino ativo - aguardando sinal do protótipo";
+        tentativasConexao = 0;
+        return;
+    }
+
     if (online) {
-        ponto.className = "ponto-conexao simulado";
+        ponto.className = "ponto-conexao offline";
         label.innerText = "Site online - aguardando sinal do Arduino";
         tentativasConexao = 0;
         return;

@@ -654,6 +654,13 @@ function obterDadosAtuais() {
     const deveSimular = modoOperacao === "simulacao" ||
         (modoOperacao === "automatico" && SIMULACAO_AUTOMATICA && (MODO_CLOUD || dadosArduino.conexao !== "online" || semLeituraReal));
 
+    if (modoOperacao === "arduino" && (dadosArduino.simulado || dadosArduino.conexao !== "online" || semLeituraReal)) {
+        return {
+            ...criarDadosBase(MODO_CLOUD ? "cloud" : dadosArduino.conexao === "online" ? "online" : "offline"),
+            modoOperacao
+        };
+    }
+
     if (deveSimular) {
         const simulado = gerarDadosSimulados();
         simulado.modoOperacao = modoOperacao;
@@ -794,6 +801,11 @@ app.post("/modo", (req, res) => {
     }
 
     modoOperacao = modo;
+
+    if (modoOperacao === "arduino" && dadosArduino.simulado) {
+        dadosArduino = criarDadosBase(MODO_CLOUD ? "cloud" : portaSerial?.isOpen ? "online" : "offline");
+    }
+
     res.setHeader("Cache-Control", "no-store");
     res.json({
         modo: modoOperacao,
