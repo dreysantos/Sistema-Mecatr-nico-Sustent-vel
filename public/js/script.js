@@ -383,7 +383,8 @@ function renderizarTokenAcesso(dados) {
             consulta.appendChild(box);
         }
 
-        const linkAtual = dados.links?.leituras || `${window.location.origin}${window.location.pathname}?token=${encodeURIComponent(dados.token)}`;
+        const paginaAtual = window.location.pathname.replace(/^\//, "").replace(/\.html$/, "");
+        const linkAtual = dados.links?.[paginaAtual] || `${window.location.origin}${window.location.pathname}?token=${encodeURIComponent(dados.token)}`;
         box.innerHTML = `
             <strong>Código da leitura</strong>
             <code>${escaparHTML(dados.token)}</code>
