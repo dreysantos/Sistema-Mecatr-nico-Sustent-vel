@@ -709,7 +709,7 @@ async function carregarDashboardHome() {
     try {
         const token = await tokenAtual("tokenModo");
         const [dados, relatorio, saude] = await Promise.all([
-            buscarJSON("/dados"),
+            buscarJSON(`/dados?${montarQuery({ token })}`),
             buscarJSON(`/relatorio?${montarQuery({ token })}`),
             buscarJSON("/saude")
         ]);
@@ -728,7 +728,8 @@ async function carregarDashboardHome() {
 
 async function buscarDadosArduino() {
     try {
-        const dados = await buscarJSON("/dados");
+        const token = await tokenAtual("tokenModo");
+        const dados = await buscarJSON(`/dados?${montarQuery({ token })}`);
 
         if (!dados || typeof dados !== "object") {
             throw new Error("Dados inválidos recebidos");

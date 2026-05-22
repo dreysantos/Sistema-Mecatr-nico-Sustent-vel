@@ -16,6 +16,7 @@ const LIMITE_HISTORICO = Number(process.env.LIMITE_HISTORICO) || 60;
 const LIMITE_REQUISICOES = Number(process.env.LIMITE_REQUISICOES) || 120;
 const JANELA_TEMPO = Number(process.env.JANELA_TEMPO_MS) || 60000;
 const DIAGNOSTICO_TOKEN = process.env.DIAGNOSTICO_TOKEN || "";
+const DADOS_PUBLICOS = process.env.DADOS_PUBLICOS !== "false";
 const TRUST_PROXY = process.env.TRUST_PROXY === "true";
 const CORS_PERMITIDOS = CORS_ORIGEM.split(",").map((origem) => origem.trim()).filter(Boolean);
 const BANCO_ATIVO = process.env.BANCO_ATIVO !== "false";
@@ -794,6 +795,10 @@ function agendarReconexao() {
 }
 
 app.get("/dados", (req, res) => {
+    if (!DADOS_PUBLICOS && !diagnosticoAutorizado(req)) {
+        return res.status(401).json({ erro: "Dados protegidos" });
+    }
+
     res.setHeader("Cache-Control", "no-store");
     res.json(obterDadosAtuais());
 });
@@ -809,6 +814,10 @@ app.get("/modo", (req, res) => {
 });
 
 app.get("/token-acesso", (req, res) => {
+    if (DIAGNOSTICO_TOKEN && !diagnosticoAutorizado(req)) {
+        return res.status(401).json({ erro: "Codigo de consulta protegido" });
+    }
+
     const token = obterDadosAtuais().tokenAcesso || gerarTokenAcesso();
     const base = obterUrlPublica(req) || `${req.protocol}://${req.headers.host}`;
     registrarCodigoConsulta(token);
@@ -828,7 +837,7 @@ app.get("/token-acesso", (req, res) => {
 });
 
 app.post("/modo", (req, res) => {
-    if (!diagnosticoAutorizado(req)) {
+    if (!alteracaoAutorizada(req)) {
         return res.status(401).json({ erro: "Alteracao de modo protegida" });
     }
 
@@ -851,6 +860,10 @@ app.post("/modo", (req, res) => {
 });
 
 app.get("/historico", (req, res) => {
+    if (!diagnosticoAutorizado(req)) {
+        return res.status(401).json({ erro: "Historico protegido" });
+    }
+
     res.setHeader("Cache-Control", "no-store");
     res.json(historico.slice(-LIMITE_HISTORICO));
 });
@@ -924,7 +937,7 @@ app.get("/saude", (req, res) => {
     res.setHeader("Cache-Control", "no-store");
     res.json({
         status: "online",
-        arduino: dadosArduino.conexao,
+        arduino: DIAGNOSTICO_TOKEN && !diagnosticoAutorizado(req) ? "protegido" : dadosArduino.conexao,
         modoOperacao,
         modoCloud: MODO_CLOUD,
         simulacaoAutomatica: SIMULACAO_AUTOMATICA,
@@ -936,6 +949,10 @@ app.get("/saude", (req, res) => {
 });
 
 app.get("/rede", (req, res) => {
+    if (!alteracaoAutorizada(req)) {
+        return res.status(401).json({ erro: "Informacoes de rede protegidas" });
+    }
+
     const ipLocal = obterIpLocal();
     const baseLocal = `http://localhost:${PORTA_SITE}`;
     const baseRede = `http://${ipLocal}:${PORTA_SITE}`;
@@ -961,11 +978,25 @@ function diagnosticoAutorizado(req) {
     const tokenRecente = historico.some((leitura) => String(leitura.tokenAcesso || "").trim() === tokenInformado);
     const codigoRecente = codigosConsultaRecentes.includes(tokenInformado);
 
+    if (DIAGNOSTICO_TOKEN) {
+        return tokenInformado === DIAGNOSTICO_TOKEN;
+    }
+
     if (tokenInformado && ((tokenAtual && tokenInformado === tokenAtual) || tokenRecente || codigoRecente)) {
         return true;
     }
 
-    return Boolean(DIAGNOSTICO_TOKEN && tokenInformado === DIAGNOSTICO_TOKEN);
+    return false;
+}
+
+function alteracaoAutorizada(req) {
+    const tokenInformado = String(req.headers["x-diagnostico-token"] || req.query.token || "").trim();
+
+    if (DIAGNOSTICO_TOKEN) {
+        return tokenInformado === DIAGNOSTICO_TOKEN;
+    }
+
+    return diagnosticoAutorizado(req);
 }
 
 app.get("/diagnostico", async (req, res) => {
