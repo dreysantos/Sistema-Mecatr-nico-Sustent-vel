@@ -29,6 +29,7 @@
         <a href="/componentes.html">Componentes</a>
         <a href="/simulacao.html" aria-current="page">Simulação</a>
         <a href="/diagnostico.html">Diagnóstico</a>
+        <a href="/bibliografia.html">Bibliografia</a>
         <a href="/sobre.html">Sobre</a>
     </nav>
 
@@ -69,6 +70,12 @@
         </div>
 
         <div class="info-box">
+            <h3>Diferença entre simulação e montagem física</h3>
+            <p>No Wokwi, os potenciômetros ligados aos pinos A0, A1 e A2 representam, respectivamente, corrente, tensão da bateria e tensão recebida pela placa solar. As chaves ligadas aos pinos 2, 3 e 4 representam as boias de nível baixo, médio e alto.</p>
+            <p>A simulação pode usar cinco displays LCD para facilitar a leitura durante a apresentação. Na montagem física de baixo custo, a recomendação do TCC é usar apenas um LCD 16x2 I2C e alternar as telas por programação.</p>
+        </div>
+
+        <div class="info-box">
             <h3>Transparência na apresentação</h3>
             <p>Os dados em modo simulação servem para demonstrar o funcionamento esperado do sistema. Quando conectado ao Arduino, o painel pode exibir as leituras reais do protótipo. Essa separação evita confundir demonstração com medição real e deixa claro para a banca quando o sistema está operando com dados físicos ou demonstrativos.</p>
         </div>
@@ -90,6 +97,11 @@
             <h3>Fluxo de dados</h3>
             <p>Reservatório, placa solar e bateria -> Arduino -> JSON serial -> Servidor Node.js -> rota <code>/dados</code> -> interface web -> gráficos e alertas.</p>
         </div>
+
+        <div class="alerta-site">
+            <strong>Ligação solar correta:</strong>
+            <p>A placa solar não deve ser ligada diretamente ao Arduino. A sequência indicada é: placa solar, controlador de carga, bateria 12V, conversor buck 5V e, depois, Arduino e sensores.</p>
+        </div>
     </section>
 
     <footer>
@@ -98,3 +110,5 @@
 </body>
 
 </html>
+
+

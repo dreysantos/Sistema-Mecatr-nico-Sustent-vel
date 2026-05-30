@@ -29,6 +29,7 @@
         <a href="/componentes.html" aria-current="page">Componentes</a>
         <a href="/simulacao.html">Simulação</a>
         <a href="/diagnostico.html">Diagnóstico</a>
+        <a href="/bibliografia.html">Bibliografia</a>
         <a href="/sobre.html">Sobre</a>
     </nav>
 
@@ -47,7 +48,7 @@
             <div class="item"><strong>Controlador de carga</strong><p>Gerencia a recarga da bateria 12V pela placa solar.</p></div>
             <div class="item"><strong>Bateria 12V</strong><p>Armazena energia para funcionamento sem sol direto.</p></div>
             <div class="item"><strong>Conversor Buck</strong><p>Reduz 12V para 5V quando necessário.</p></div>
-            <div class="item"><strong>LCD I2C 16x2</strong><p>Exibe leituras diretamente no protótipo; na simulação podem ser usados cinco displays.</p></div>
+            <div class="item"><strong>LCD I2C 16x2</strong><p>Na versão física recomendada, um display alterna as telas. Na simulação do Wokwi, cinco displays podem separar as informações para apresentação.</p></div>
             <div class="item"><strong>LEDs e buzzer</strong><p>Sinalizam nível, operação normal, atenção e falhas elétricas.</p></div>
             <div class="item"><strong>Placa perfurada e soldagem</strong><p>Permitem uma montagem mais firme que a protoboard para apresentação e testes.</p></div>
             <div class="item"><strong>Conectores, bornes e fusível</strong><p>Facilitam manutenção e aumentam a proteção da alimentação 12V.</p></div>
@@ -57,7 +58,8 @@
         <div class="info-box">
             <h3>Resumo técnico</h3>
             <div class="resumo-grid">
-                <p><strong>Custo estimado:</strong> R$ 927,50 na versão completa do TCC.</p>
+                <p><strong>Custo estimado:</strong> R$ 663,50 considerando os componentes essenciais do protótipo.</p>
+                <p><strong>Com ferramentas:</strong> R$ 815,50 caso seja necessário comprar ferro de solda, estação, fluxo e fio de solda.</p>
                 <p><strong>Classificação:</strong> baixo custo relativo em comparação a sistemas comerciais e didáticos prontos.</p>
                 <p><strong>Operação:</strong> 12V bateria / 5V Arduino.</p>
                 <p><strong>Comunicação:</strong> USB serial em 9600 baud.</p>
@@ -72,7 +74,7 @@
 
         <div class="alerta-site">
             <strong>Por que baixo custo relativo?</strong>
-            <p>O valor completo inclui vários recursos para fins de TCC: monitoramento elétrico, energia solar, bateria, LCD, alertas, montagem física e interface web. O projeto é considerado acessível porque usa componentes populares, permite reaproveitamento de reservatórios e pode ser simplificado conforme a necessidade da comunidade ou da escola.</p>
+            <p>O orçamento foi revisado para separar os componentes essenciais das ferramentas de montagem. Isso deixa a proposta mais coerente com o uso em escola ou projeto social, porque ferramentas como ferro de solda, estação de soldagem, fluxo e fio de solda podem ser compartilhadas em laboratório.</p>
         </div>
 
         <div class="info-box">
@@ -84,6 +86,16 @@
                 <p><strong>Reaproveitamento:</strong> uso de galões, bombonas ou caixas plásticas reduz o custo da estrutura física.</p>
             </div>
         </div>
+
+        <div class="info-box">
+            <h3>Detalhamento das escolhas</h3>
+            <div class="resumo-grid">
+                <p><strong>Arduino Uno:</strong> mantido pela documentação ampla, custo relativo menor e facilidade de programação.</p>
+                <p><strong>Boias de nível:</strong> escolhidas por serem simples, baratas e menos dependentes de calibração do que sensores ultrassônicos.</p>
+                <p><strong>Relé 5V:</strong> separa o circuito de controle do Arduino da alimentação de potência da bomba 12V.</p>
+                <p><strong>Sistema solar:</strong> placa solar, controlador de carga, bateria e conversor buck demonstram autonomia e sustentabilidade.</p>
+            </div>
+        </div>
     </section>
 
     <footer>
@@ -92,3 +104,5 @@
 </body>
 
 </html>
+
+
