@@ -1,18 +1,18 @@
 :root {
-    --bg: #edf4f7;
+    --bg: #f6fbf9;
     --surface: #ffffff;
-    --surface-soft: #f6faf8;
-    --text: #162322;
-    --muted: #5d706e;
-    --brand: #006b5f;
-    --brand-dark: #003f39;
-    --brand-strong: #16804f;
-    --accent: #2c9fbe;
-    --warning: #c77a00;
-    --danger: #bd3b32;
-    --border: #d5e4e5;
-    --shadow: 0 8px 22px rgba(21, 55, 68, 0.12);
-    --radius: 8px;
+    --surface-soft: #f0f8f6;
+    --text: #082826;
+    --muted: #4a6a64;
+    --brand: #0e7666;
+    --brand-dark: #074c42;
+    --brand-strong: #149a7f;
+    --accent: #f6a01a;
+    --warning: #d97706;
+    --danger: #b91c1c;
+    --border: #e6f2ef;
+    --shadow: 0 10px 28px rgba(6, 45, 40, 0.08);
+    --radius: 10px;
     --page-width: 1120px;
 }
 
@@ -145,7 +145,7 @@ section {
     font-size: 17px;
     font-weight: 800;
     text-decoration: none;
-    transition: transform 0.2s, background 0.2s;
+    transition: transform 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
 }
 
 .botao-primario:hover,
@@ -224,11 +224,13 @@ section {
     display: flex;
     flex-direction: column;
     gap: 12px;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
 .card:hover,
 .simulacao-card:hover {
-    transform: translateY(-2px);
+    transform: translateY(-6px);
+    box-shadow: 0 14px 36px rgba(6, 45, 40, 0.12);
 }
 
 .card h3,
@@ -303,7 +305,7 @@ section h4 {
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    animation: pulse 2s infinite;
+    animation: pulse 1.6s infinite;
 }
 
 .ponto-conexao.online {
@@ -319,7 +321,7 @@ section h4 {
 .ponto-conexao.offline {
     background: var(--danger);
     box-shadow: 0 0 8px rgba(189, 59, 50, 0.6);
-    animation: pulse-erro 1s infinite;
+    animation: pulse-erro 0.9s infinite;
 }
 
 .barra-medidor {
@@ -694,32 +696,25 @@ footer p {
     header {
         padding: 32px 16px 28px;
     }
-
     header h1 {
         font-size: 28px;
     }
-
     header p {
         font-size: 16px;
     }
-
     nav {
         justify-content: flex-start;
         padding-inline: 10px;
     }
-
     section {
         padding: 34px 16px;
     }
-
     .titulo-secao {
         font-size: 24px;
     }
-
     .texto {
         font-size: 16px;
     }
-
     .painel,
     .grid-explicacao,
     .componentes,
@@ -730,31 +725,24 @@ footer p {
     .diagnostico-grid {
         grid-template-columns: 1fr;
     }
-
     .consulta-box {
         grid-template-columns: 1fr;
     }
-
     .modo-box {
         grid-template-columns: 1fr;
     }
-
     #cardsLeituras {
         display: grid;
     }
-
     .tabela-scroll {
         display: none;
     }
-
     .card {
         min-height: auto;
     }
-
     .valor {
         font-size: 24px;
     }
-
     .lcd-linha {
         font-size: 18px;
     }
@@ -764,29 +752,23 @@ footer p {
     header h1 {
         font-size: 24px;
     }
-
     nav a {
         min-height: 38px;
         padding-inline: 10px;
         font-size: 14px;
     }
-
     section {
         padding: 28px 12px;
     }
-
     .titulo-secao {
         font-size: 22px;
     }
-
     .status-conexao {
         align-items: flex-start;
     }
-
     .lcd-box {
         padding: 14px;
     }
-
     .lcd-linha {
         min-height: 26px;
         font-size: 16px;
@@ -795,7 +777,7 @@ footer p {
 }
 
 @media (prefers-color-scheme: dark) {
-    :root {
+     :root {
         --bg: #101715;
         --surface: #182724;
         --surface-soft: #12201d;
@@ -806,15 +788,12 @@ footer p {
         --border: #314944;
         --shadow: 0 8px 24px rgba(0, 0, 0, 0.44);
     }
-
     header {
         background: linear-gradient(135deg, #003d38, #006b5f, #286e83);
     }
-
     .barra-medidor {
         background: #2e423e;
     }
-
     .alerta-site {
         background: #2a2410;
         color: var(--text);
