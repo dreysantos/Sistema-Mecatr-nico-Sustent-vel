@@ -9,7 +9,7 @@
     <meta name="theme-color" content="#005f56" />
     <meta name="color-scheme" content="light dark" />
     <title>Funcionamento - Sistema Mecatrônico</title>
-    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/style.css?v=2" />
 </head>
 
 <body>
@@ -28,6 +28,7 @@
         <a href="/funcionamento.html" aria-current="page">Funcionamento</a>
         <a href="/componentes.html">Componentes</a>
         <a href="/simulacao.html">Simulação</a>
+        <a href="/avaliacao.html">Avaliação</a>
         <a href="/diagnostico.html">Diagnóstico</a>
         <a href="/bibliografia.html">Bibliografia</a>
         <a href="/sobre.html">Sobre</a>
@@ -73,13 +74,15 @@
 
         <div class="info-box">
             <h3>Funcionamento real e modo simulação</h3>
-            <p>Quando o Arduino está conectado, o servidor recebe as leituras reais pela comunicação USB serial e exibe os dados no painel. Quando o Arduino não está conectado, o sistema pode gerar leituras demonstrativas para manter a apresentação funcionando e mostrar à banca o comportamento esperado do protótipo.</p>
+            <p>Quando o Arduino está conectado, o servidor recebe as leituras reais pela comunicação USB serial e exibe os dados no painel. Quando o Arduino não está conectado, o sistema pode gerar leituras demonstrativas para manter a apresentação funcionando
+                e mostrar à banca o comportamento esperado do protótipo.</p>
             <p>Os dados simulados não substituem os testes reais; eles servem para explicar a lógica de controle, os alertas e os estados de funcionamento durante a demonstração.</p>
         </div>
 
         <div class="info-box">
             <h3>Lógica de decisão</h3>
-            <p>A bateria baixa tem prioridade sobre o acionamento da bomba. Se a tensão ficar abaixo do limite configurado, a bomba é desligada para proteger a alimentação. Com a bateria em condição segura, o Arduino avalia os sensores de nível: reservatório cheio desliga a bomba; nível médio ou baixo permite o acionamento para abastecimento.</p>
+            <p>A bateria baixa tem prioridade sobre o acionamento da bomba. Se a tensão ficar abaixo do limite configurado, a bomba é desligada para proteger a alimentação. Com a bateria em condição segura, o Arduino avalia os sensores de nível: reservatório
+                cheio desliga a bomba; nível médio ou baixo permite o acionamento para abastecimento.</p>
             <p>O sensor ACS712 acompanha a corrente da bomba. Quando a leitura ultrapassa o limite definido no código, o LED vermelho e o buzzer indicam alerta de corrente alta.</p>
         </div>
 
@@ -105,5 +108,3 @@
 </body>
 
 </html>
-
-

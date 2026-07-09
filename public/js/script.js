@@ -28,7 +28,7 @@ function elemento(id) {
 }
 
 function escaparHTML(valor) {
-    return String(valor ?? "")
+    return String(valor ? ? "")
         .replaceAll("&", "&amp;")
         .replaceAll("<", "&lt;")
         .replaceAll(">", "&gt;")
@@ -200,16 +200,19 @@ function desenharGrafico() {
         ctx.fillText(`${solar.toFixed(solar % 1 === 0 ? 0 : 1)}V`, area.direita + 8, y);
     }
 
+    const corBateria = getComputedStyle(document.documentElement).getPropertyValue("--brand-strong").trim() || "#149a7f";
+    const corSolar = getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() || "#f6a01a";
+
     ctx.textBaseline = "alphabetic";
     ctx.textAlign = "left";
-    ctx.fillStyle = "#16804f";
+    ctx.fillStyle = corBateria;
     ctx.fillText("Bateria (%)", area.esquerda, 16);
-    ctx.fillStyle = "#2c9fbe";
+    ctx.fillStyle = corSolar;
     ctx.textAlign = "right";
     ctx.fillText("Solar (V)", area.direita, 16);
 
-    desenharLinha(ctx, pontos, "cargaBateria", "#16804f", area, maxX, 100, "%");
-    desenharLinha(ctx, pontos, "tensaoSolar", "#2c9fbe", area, maxX, 25, "V");
+    desenharLinha(ctx, pontos, "cargaBateria", corBateria, area, maxX, 100, "%");
+    desenharLinha(ctx, pontos, "tensaoSolar", corSolar, area, maxX, 25, "V");
 }
 
 function desenharLinha(ctx, pontos, campo, cor, area, maxX, maxY, unidade) {
@@ -362,7 +365,7 @@ function classeAlerta(alerta) {
 }
 
 function tokenAtualLocal(idCampo) {
-    return elemento(idCampo)?.value || new URLSearchParams(window.location.search).get("token") || "";
+    return elemento(idCampo) ? .value || new URLSearchParams(window.location.search).get("token") || "";
 }
 
 function camposToken() {
@@ -371,7 +374,7 @@ function camposToken() {
 
 function renderizarTokenAcesso(dados) {
     const consultas = document.querySelectorAll(".consulta-box, .modo-box");
-    if (!consultas.length || !dados?.token) {
+    if (!consultas.length || !dados ? .token) {
         return;
     }
 
@@ -384,7 +387,7 @@ function renderizarTokenAcesso(dados) {
         }
 
         const paginaAtual = window.location.pathname.replace(/^\//, "").replace(/\.html$/, "");
-        const linkAtual = dados.links?.[paginaAtual] || `${window.location.origin}${window.location.pathname}?token=${encodeURIComponent(dados.token)}`;
+        const linkAtual = dados.links ? .[paginaAtual] || `${window.location.origin}${window.location.pathname}?token=${encodeURIComponent(dados.token)}`;
         box.innerHTML = `
             <strong>Código da leitura</strong>
             <code>${escaparHTML(dados.token)}</code>
@@ -395,7 +398,7 @@ function renderizarTokenAcesso(dados) {
     });
 
     document.querySelectorAll(".copiar-token").forEach((botao) => {
-        botao.addEventListener("click", async () => {
+        botao.addEventListener("click", async() => {
             try {
                 await navigator.clipboard.writeText(botao.dataset.token || dados.token);
                 botao.innerText = "Copiado";
@@ -411,7 +414,7 @@ function renderizarTokenAcesso(dados) {
 
 async function carregarTokenAcesso(forcar = false) {
     const tokenUrl = new URLSearchParams(window.location.search).get("token");
-    if (!forcar && tokenAcessoCache?.token) {
+    if (!forcar && tokenAcessoCache ? .token) {
         return tokenAcessoCache;
     }
 
@@ -561,11 +564,11 @@ function renderizarTabelaLeituras(leituras) {
     }
 
     tabela.innerHTML = leituras.slice().reverse().map((leitura) => {
-        const alerta = leitura.alerta || "-";
-        const origem = leitura.simulado ? "Simulada" : "Arduino";
-        const token = leitura.tokenAcesso || "";
+                const alerta = leitura.alerta || "-";
+                const origem = leitura.simulado ? "Simulada" : "Arduino";
+                const token = leitura.tokenAcesso || "";
 
-        return `
+                return `
             <tr>
                 <td>${escaparHTML(formatarDataLeitura(leitura))}</td>
                 <td><span class="selo ${leitura.nivel === "CHEIO" || leitura.nivel === "BAIXO" ? "erro" : "aviso"}">${escaparHTML(leitura.nivel || "-")}</span></td>

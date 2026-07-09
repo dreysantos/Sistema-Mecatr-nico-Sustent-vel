@@ -9,7 +9,7 @@
     <meta name="theme-color" content="#005f56" />
     <meta name="color-scheme" content="light dark" />
     <title>Simulação - Sistema Mecatrônico</title>
-    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/style.css?v=2" />
 </head>
 
 <body>
@@ -28,6 +28,7 @@
         <a href="/funcionamento.html">Funcionamento</a>
         <a href="/componentes.html">Componentes</a>
         <a href="/simulacao.html" aria-current="page">Simulação</a>
+        <a href="/avaliacao.html">Avaliação</a>
         <a href="/diagnostico.html">Diagnóstico</a>
         <a href="/bibliografia.html">Bibliografia</a>
         <a href="/sobre.html">Sobre</a>
@@ -66,7 +67,8 @@
         </div>
 
         <div class="alerta-site">
-            <strong>Modo simulação:</strong> no Wokwi, chaves representam os sensores de nível e potenciômetros representam corrente, bateria e tensão solar. Em nuvem ou sem Arduino conectado, a rota <code>/dados</code> retorna leituras demonstrativas para manter o painel apresentável.
+            <strong>Modo simulação:</strong> no Wokwi, chaves representam os sensores de nível e potenciômetros representam corrente, bateria e tensão solar. Em nuvem ou sem Arduino conectado, a rota <code>/dados</code> retorna leituras demonstrativas
+            para manter o painel apresentável.
         </div>
 
         <div class="info-box">
@@ -77,20 +79,39 @@
 
         <div class="info-box">
             <h3>Transparência na apresentação</h3>
-            <p>Os dados em modo simulação servem para demonstrar o funcionamento esperado do sistema. Quando conectado ao Arduino, o painel pode exibir as leituras reais do protótipo. Essa separação evita confundir demonstração com medição real e deixa claro para a banca quando o sistema está operando com dados físicos ou demonstrativos.</p>
+            <p>Os dados em modo simulação servem para demonstrar o funcionamento esperado do sistema. Quando conectado ao Arduino, o painel pode exibir as leituras reais do protótipo. Essa separação evita confundir demonstração com medição real e deixa claro
+                para a banca quando o sistema está operando com dados físicos ou demonstrativos.</p>
         </div>
 
         <h2 class="titulo-secao">Mapa de conexões</h2>
         <div class="conexoes-grid">
-            <div class="conexao-item"><strong>Sensores de nível</strong><code>D2, D3, D4</code><p>Entradas digitais com chaves para detectar níveis de água.</p></div>
-            <div class="conexao-item"><strong>Sensor ACS712</strong><code>A0</code><p>Entrada analógica para medir corrente elétrica.</p></div>
-            <div class="conexao-item"><strong>Tensão da bateria</strong><code>A1</code><p>Monitoramento da bateria 12V.</p></div>
-            <div class="conexao-item"><strong>Tensão solar</strong><code>A2</code><p>Monitoramento da placa solar.</p></div>
-            <div class="conexao-item"><strong>Relé da bomba</strong><code>D7</code><p>Saída digital para controle da bomba.</p></div>
-            <div class="conexao-item"><strong>LEDs indicadores</strong><code>D8, D9, D10</code><p>Sinalização verde, amarela e vermelha.</p></div>
-            <div class="conexao-item"><strong>Buzzer</strong><code>D11</code><p>Alerta sonoro em falhas ou condições críticas.</p></div>
-            <div class="conexao-item"><strong>LCDs I2C</strong><code>A4, A5</code><p>Comunicação SDA/SCL para os displays 16x2.</p></div>
-            <div class="conexao-item"><strong>Comunicação serial</strong><code>USB</code><p>Envio de JSON para o servidor web.</p></div>
+            <div class="conexao-item"><strong>Sensores de nível</strong><code>D2, D3, D4</code>
+                <p>Entradas digitais com chaves para detectar níveis de água.</p>
+            </div>
+            <div class="conexao-item"><strong>Sensor ACS712</strong><code>A0</code>
+                <p>Entrada analógica para medir corrente elétrica.</p>
+            </div>
+            <div class="conexao-item"><strong>Tensão da bateria</strong><code>A1</code>
+                <p>Monitoramento da bateria 12V.</p>
+            </div>
+            <div class="conexao-item"><strong>Tensão solar</strong><code>A2</code>
+                <p>Monitoramento da placa solar.</p>
+            </div>
+            <div class="conexao-item"><strong>Relé da bomba</strong><code>D7</code>
+                <p>Saída digital para controle da bomba.</p>
+            </div>
+            <div class="conexao-item"><strong>LEDs indicadores</strong><code>D8, D9, D10</code>
+                <p>Sinalização verde, amarela e vermelha.</p>
+            </div>
+            <div class="conexao-item"><strong>Buzzer</strong><code>D11</code>
+                <p>Alerta sonoro em falhas ou condições críticas.</p>
+            </div>
+            <div class="conexao-item"><strong>LCDs I2C</strong><code>A4, A5</code>
+                <p>Comunicação SDA/SCL para os displays 16x2.</p>
+            </div>
+            <div class="conexao-item"><strong>Comunicação serial</strong><code>USB</code>
+                <p>Envio de JSON para o servidor web.</p>
+            </div>
         </div>
 
         <div class="info-box">
@@ -110,5 +131,3 @@
 </body>
 
 </html>
-
-
