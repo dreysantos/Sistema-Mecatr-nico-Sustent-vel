@@ -10,7 +10,7 @@
     <meta name="theme-color" content="#005f56" />
     <meta name="color-scheme" content="light dark" />
     <title>Sistema Mecatrônico Social de Baixo Custo</title>
-    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/style.css?v=2" />
 </head>
 
 <body>
@@ -42,13 +42,19 @@
 
         <div class="alerta-site">
             <strong>Problema social:</strong>
-            <p>Muitas residências de baixa renda, escolas públicas e espaços comunitários ainda dependem de controle manual da água e da energia. Isso pode gerar transbordamento de reservatórios, acionamento desnecessário da bomba, descarga da bateria sem aviso e pouca visibilidade sobre o consumo elétrico.</p>
+            <p>Muitas residências de baixa renda, escolas públicas e espaços comunitários ainda dependem de controle manual da água e da energia. Isso pode gerar transbordamento de reservatórios, acionamento desnecessário da bomba, descarga da bateria sem
+                aviso e pouca visibilidade sobre o consumo elétrico.</p>
         </div>
 
-        <a class="botao-primario" href="/painel.html">Abrir painel de monitoramento</a>
+        <div class="acoes-home">
+            <a class="botao-primario" href="/painel.html">Abrir painel de monitoramento</a>
+            <a class="botao-primario botao-secundario" href="/avaliacao.html">Avaliar o projeto</a>
+        </div>
 
         <div class="diagnostico-grid" id="dashboardHome">
-            <div class="diagnostico-item"><strong>Carregando</strong><p>Buscando resumo do sistema...</p></div>
+            <div class="diagnostico-item"><strong>Carregando</strong>
+                <p>Buscando resumo do sistema...</p>
+            </div>
         </div>
 
         <div class="cards-home">
@@ -88,7 +94,9 @@
 
         <div class="info-box">
             <h3>Frase de defesa</h3>
-            <p>Este site funciona como interface de acompanhamento do protótipo. Ele mostra nível de água, bomba, corrente, bateria, tensão solar e alertas, permitindo demonstrar tanto as leituras reais do Arduino quanto o comportamento esperado no modo simulação.</p>
+            <p>Este site funciona como interface de acompanhamento do protótipo. Ele mostra nível de água, bomba, corrente, bateria, tensão solar e alertas, permitindo demonstrar tanto as leituras reais do Arduino quanto o comportamento esperado no modo
+                simulação.
+            </p>
         </div>
     </section>
 
@@ -99,5 +107,3 @@
 </body>
 
 </html>
-
-
