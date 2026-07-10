@@ -7,7 +7,7 @@ require("dotenv").config();
 
 const app = express();
 const PORTA_SITE = process.env.PORT || process.env.PORTA_SITE || 3000;
-const PORTA_ARDUINO = process.env.PORTA_ARDUINO || "COM3";
+const PORTAS_ARDUINO = parsePortasArduino(process.env.PORTA_ARDUINO || process.env.PORTAS_ARDUINO || "COM3");
 const BAUD_RATE = Number(process.env.BAUD_RATE) || 9600;
 const MODO_CLOUD = process.env.MODO_CLOUD === "true";
 const SIMULACAO_AUTOMATICA = process.env.SIMULACAO_AUTOMATICA !== "false";
@@ -160,6 +160,38 @@ app.get("/:pagina.html", (req, res, next) => {
         res.sendFile(arquivoPagina);
     });
 });
+
+function parsePortasArduino(valor) {
+    return String(valor || "")
+        .split(/[\s,]+/)
+        .map((porta) => porta.trim())
+        .filter(Boolean);
+}
+
+function listarPortasCandidatas(portasPreferidas, portasDisponiveis) {
+    const portas = (portasDisponiveis || [])
+        .map((porta) => String(porta || "").trim())
+        .filter(Boolean);
+
+    const preferidas = (portasPreferidas || [])
+        .map((porta) => String(porta || "").trim())
+        .filter(Boolean);
+
+    const encontradas = preferidas.filter((porta) => portas.includes(porta));
+    const restantes = portas.filter((porta) => !preferidas.includes(porta));
+    return [...encontradas, ...restantes];
+}
+
+async function obterPortasDisponiveis() {
+    try {
+        const { SerialPort } = require("serialport");
+        const portas = await SerialPort.list();
+        return portas.map((porta) => String(porta.path || porta.portName || porta.comName || "").trim()).filter(Boolean);
+    } catch (erro) {
+        console.warn("Nao foi possivel listar portas seriais:", erro.message);
+        return [];
+    }
+}
 
 function criarDadosBase(conexao) {
     const agora = new Date();
@@ -563,7 +595,7 @@ function salvarLeituraBanco(registro) {
 
     ultimaGravacaoBanco = agora;
     filaBanco = filaBanco
-        .then(async () => {
+        .then(async() => {
             if (SUPABASE_ATIVO) {
                 await salvarLeituraSupabase(registro);
                 return;
@@ -712,7 +744,7 @@ function obterDadosAtuais() {
     };
 }
 
-function conectarArduino() {
+async function conectarArduino() {
     if (MODO_CLOUD) {
         console.log("Modo cloud ativo: servidor online sem conexao serial com Arduino.");
         dadosArduino.conexao = "cloud";
@@ -722,58 +754,88 @@ function conectarArduino() {
     try {
         const { SerialPort } = require("serialport");
         const { ReadlineParser } = require("@serialport/parser-readline");
+        const portasDisponiveis = await obterPortasDisponiveis();
+        const portasParaTentar = listarPortasCandidatas(PORTAS_ARDUINO, portasDisponiveis);
+        const portasParaLog = portasParaTentar.length ? portasParaTentar : PORTAS_ARDUINO;
 
-        portaSerial = new SerialPort({
-            path: PORTA_ARDUINO,
-            baudRate: BAUD_RATE,
-            autoOpen: false
-        });
+        console.log(`Tentando conectar com Arduino nas portas: ${portasParaLog.join(", ") || "nenhuma"}`);
 
-        const parser = portaSerial.pipe(new ReadlineParser({ delimiter: "\n" }));
-
-        portaSerial.open((erro) => {
-            if (erro) {
-                console.error("Erro ao abrir porta serial:", erro.message);
-                dadosArduino.conexao = "offline";
-                agendarReconexao();
-                return;
-            }
-
-            console.log("Arduino conectado na porta:", PORTA_ARDUINO);
-            dadosArduino.conexao = "online";
-            reconexaoAgendada = false;
-        });
-
-        parser.on("data", (linha) => {
+        for (const porta of portasParaLog) {
             try {
-                if (linha.length > 1000) {
-                    throw new Error("Linha muito longa");
+                if (portaSerial && portaSerial.isOpen) {
+                    await new Promise((resolve) => portaSerial.close(() => resolve()));
                 }
 
-                const dadosValidados = validarDadosArduino(JSON.parse(linha.trim()));
-                if (!dadosValidados) {
-                    throw new Error("Formato invalido");
-                }
+                portaSerial = new SerialPort({
+                    path: porta,
+                    baudRate: BAUD_RATE,
+                    autoOpen: false
+                });
 
-                dadosArduino = dadosValidados;
-                ultimaLeituraReal = Date.now();
-                adicionarHistorico(dadosArduino);
+                const parser = portaSerial.pipe(new ReadlineParser({ delimiter: "\n" }));
+
+                await new Promise((resolve, reject) => {
+                    portaSerial.open((erro) => {
+                        if (erro) {
+                            reject(erro);
+                            return;
+                        }
+
+                        resolve();
+                    });
+                });
+
+                console.log("Arduino conectado na porta:", porta);
+                dadosArduino.conexao = "online";
+                reconexaoAgendada = false;
+
+                parser.on("data", (linha) => {
+                    try {
+                        if (linha.length > 1000) {
+                            throw new Error("Linha muito longa");
+                        }
+
+                        const dadosValidados = validarDadosArduino(JSON.parse(linha.trim()));
+                        if (!dadosValidados) {
+                            throw new Error("Formato invalido");
+                        }
+
+                        dadosArduino = dadosValidados;
+                        ultimaLeituraReal = Date.now();
+                        adicionarHistorico(dadosArduino);
+                    } catch (erro) {
+                        console.warn("Linha JSON invalida:", linha.substring(0, 80));
+                    }
+                });
+
+                portaSerial.on("error", (erro) => {
+                    console.error("Erro na porta serial:", erro.message);
+                    dadosArduino.conexao = "offline";
+                    agendarReconexao();
+                });
+
+                portaSerial.on("close", () => {
+                    console.warn("Conexao com Arduino encerrada");
+                    dadosArduino.conexao = "offline";
+                    agendarReconexao();
+                });
+
+                return;
             } catch (erro) {
-                console.warn("Linha JSON invalida:", linha.substring(0, 80));
+                console.warn(`Falha ao abrir ${porta}: ${erro.message}`);
+                if (portaSerial) {
+                    try {
+                        portaSerial.removeAllListeners();
+                    } catch (remocaoErro) {
+                        // ignora
+                    }
+                }
             }
-        });
+        }
 
-        portaSerial.on("error", (erro) => {
-            console.error("Erro na porta serial:", erro.message);
-            dadosArduino.conexao = "offline";
-            agendarReconexao();
-        });
-
-        portaSerial.on("close", () => {
-            console.warn("Conexao com Arduino encerrada");
-            dadosArduino.conexao = "offline";
-            agendarReconexao();
-        });
+        console.error("Nao foi possivel abrir nenhuma porta serial configurada.");
+        dadosArduino.conexao = "offline";
+        agendarReconexao();
     } catch (erro) {
         console.error("Erro ao configurar Arduino:", erro.message);
         dadosArduino.conexao = "offline";
@@ -868,7 +930,7 @@ app.get("/historico", (req, res) => {
     res.json(historico.slice(-LIMITE_HISTORICO));
 });
 
-app.get("/leituras", async (req, res) => {
+app.get("/leituras", async(req, res) => {
     if (!diagnosticoAutorizado(req)) {
         return res.status(401).json({ erro: "Leituras protegidas" });
     }
@@ -885,7 +947,7 @@ app.get("/leituras", async (req, res) => {
     }
 });
 
-app.get("/relatorio", async (req, res) => {
+app.get("/relatorio", async(req, res) => {
     if (!diagnosticoAutorizado(req)) {
         return res.status(401).json({ erro: "Relatorio protegido" });
     }
@@ -900,7 +962,7 @@ app.get("/relatorio", async (req, res) => {
     }
 });
 
-app.get("/alertas", async (req, res) => {
+app.get("/alertas", async(req, res) => {
     if (!diagnosticoAutorizado(req)) {
         return res.status(401).json({ erro: "Alertas protegidos" });
     }
@@ -915,7 +977,7 @@ app.get("/alertas", async (req, res) => {
     }
 });
 
-app.get("/exportar.csv", async (req, res) => {
+app.get("/exportar.csv", async(req, res) => {
     if (!diagnosticoAutorizado(req)) {
         return res.status(401).type("text/plain").send("Exportacao protegida");
     }
@@ -999,7 +1061,7 @@ function alteracaoAutorizada(req) {
     return diagnosticoAutorizado(req);
 }
 
-app.get("/diagnostico", async (req, res) => {
+app.get("/diagnostico", async(req, res) => {
     if (!diagnosticoAutorizado(req)) {
         return res.status(401).json({ erro: "Diagnostico protegido" });
     }
@@ -1044,21 +1106,29 @@ app.use((req, res) => {
     res.status(404).json({ erro: "Rota nao encontrada" });
 });
 
-app.listen(PORTA_SITE, "0.0.0.0", () => {
-    const ipLocal = obterIpLocal();
+if (require.main === module) {
+    app.listen(PORTA_SITE, "0.0.0.0", () => {
+        const ipLocal = obterIpLocal();
 
-    inicializarBanco();
-    console.log(`\nServidor rodando em http://${ipLocal}:${PORTA_SITE}`);
-    console.log(`Acesse de outro dispositivo: http://${ipLocal}:${PORTA_SITE}`);
-    console.log(`Leituras no celular: http://${ipLocal}:${PORTA_SITE}/leituras.html`);
-    console.log(`Diagnostico: http://${ipLocal}:${PORTA_SITE}/diagnostico`);
-    conectarArduino();
-});
+        inicializarBanco();
+        console.log(`\nServidor rodando em http://${ipLocal}:${PORTA_SITE}`);
+        console.log(`Acesse de outro dispositivo: http://${ipLocal}:${PORTA_SITE}`);
+        console.log(`Leituras no celular: http://${ipLocal}:${PORTA_SITE}/leituras.html`);
+        console.log(`Diagnostico: http://${ipLocal}:${PORTA_SITE}/diagnostico`);
+        conectarArduino();
+    });
 
-process.on("SIGINT", () => {
-    console.log("\nEncerrando servidor...");
-    if (portaSerial) {
-        portaSerial.close();
-    }
-    process.exit(0);
-});
+    process.on("SIGINT", () => {
+        console.log("\nEncerrando servidor...");
+        if (portaSerial) {
+            portaSerial.close();
+        }
+        process.exit(0);
+    });
+}
+
+module.exports = {
+    parsePortasArduino,
+    listarPortasCandidatas,
+    obterPortasDisponiveis
+};
